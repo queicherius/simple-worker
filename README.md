@@ -78,25 +78,25 @@ worker.setup({
 
 `createJob` takes multiple different options with which you can customise the behaviour:
 
-- `name` (required): The identifier of the job, as needed for the `registerJob` function
-- `title` (required): A human-readable title for the job, this is the display name in the web interface
-- `data`: An object with data the job can access via `job.data`. Useful for giving parameters to the job. Defaults to `{}`.
-- `priority`: Any of `low`, `normal`, `medium`, `high` and `critical`. Determines with which priority the job will get processed. Jobs with a higher priority will always get processed earlier. Defaults to `normal`.
-- `attempts`: How many times a job may be processed before getting marked as failed. Default: `1`
-- `backoff`: How much re-attempts of jobs upon failures are delayed. Default: `{delay: 30 * 1000, type: 'exponential'}`
-- `schedule`: A schedule of this job, similar to cronjobs. The format is described [here](https://github.com/node-schedule/node-schedule#cron-style-scheduling). Default: `false`
-- `ttl`: How long a job may be processed before failing as "timed out" (in ms). Default: `60 * 60 * 1000` 
-- `delay`: How long a job should be delayed before getting processed (in ms) or a `Date` in the future. Default: `false`
-- `callback`: A function getting called when the job exists with `done`. Typical node callback with the structure `(err, result)`. Default: `noop`
+- **`name` (required)** - The identifier of the job, as needed for the `registerJob` function
+- **`title` (required)** - A human-readable title for the job, this is the display name in the web interface
+- **`data`** - An object with data the job can access via `job.data`. Useful for giving parameters to the job. Defaults to `{}`.
+- **`priority`** - Any of `low`, `normal`, `medium`, `high` and `critical`. Determines with which priority the job will get processed. Jobs with a higher priority will always get processed earlier. Defaults to `normal`.
+- **`attempts`** - How many times a job may be processed before getting marked as failed. Default: `1`
+- **`backoff`** - How much re-attempts of jobs upon failures are delayed. Default: `{delay: 30 * 1000, type: 'exponential'}`
+- **`schedule`** - A schedule of this job, similar to cronjobs. The format is described [here](https://github.com/node-schedule/node-schedule#cron-style-scheduling). Default: `false`
+- **`ttl`** - How long a job may be processed before failing as "timed out" (in ms). Default: `60 * 60 * 1000` 
+- **`delay`** - How long a job should be delayed before getting processed (in ms) or a `Date` in the future. Default: `false`
+- **`callback`** - A function getting called when the job exists with `done`. Typical node callback with the structure `(err, result)`. Default: `noop`
 
 #### Job handler function
 
 `registerJob` takes a handler function with a `job` object and a `done` function. It offers the following functions:
 
-- `job.log(string)`: Add a job specific log string which gets displayed in the web interface
-- `job.process(completed, total [, data])`: Update a jobs process which gets displayed in the web interface
-- `done(new Error('Oh no.'))`: Exit a job with an error (gets passed to the optional callback)
-- `done(null, 'Yay!')`: Exit a job with a successful result (gets passed to the optional callback)
+- **`job.log(string)`** - Add a job specific log string which gets displayed in the web interface
+- **`job.process(completed, total [, data])`** - Update a jobs process which gets displayed in the web interface
+- **`done(new Error('Oh no.'))`** - Exit a job with an error (gets passed to the optional callback)
+- **`done(null, 'Yay!')`** - Exit a job with a successful result (gets passed to the optional callback)
 
 ## Example for clustering
 
