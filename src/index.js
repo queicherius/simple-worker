@@ -61,18 +61,32 @@ export const processJobs = () => {
 
   queue.process('simple-worker', (job, done) => {
     debug('processing job: ' + job.data.handler)
+
+    // Grab the actual job handler
     const callback = jobHandlers[job.data.handler]
-    callback(job, (err, data) => {
+
+    // Overwrite the done function with some logging
+    const customDone = (err, data) => {
       debug('job finished processing: ' + job.data.handler)
       done(err, data)
-    })
+    }
+
+    // Execute the job and catch all possible errors (promise / synchronous)
+    try {
+      const jobPromise = callback(job, customDone)
+      if (jobPromise !== undefined && typeof jobPromise.catch === 'function') {
+        jobPromise.catch(err => customDone(err, null))
+      }
+    } catch (err) {
+      customDone(err, null)
+    }
   })
 }
 
 // Queue a job for processing or schedule a job
 export const queueJob = (options) => {
   if (!options.name || !options.title) {
-    throw new Error(`A 'name' and a 'title' have to be provided`)
+    throw new Error("A 'name' and a 'title' have to be provided")
   }
 
   if (!options.schedule) {
@@ -104,7 +118,7 @@ const _queueJob = (options) => {
   // Save for processing later
   job.save((err) => {
     if (err) {
-      debug('Failed queuing job', options)
+      return debug('Failed queuing job', options)
     }
 
     debug(`queued job for processing: ${options.name}`)
