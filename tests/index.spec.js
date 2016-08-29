@@ -1,14 +1,12 @@
 /* eslint-env node, mocha */
 const expect = require('chai').expect
-import kue from 'kue'
 import * as worker from '../src/index'
 const queue = worker.setup()
 
-const getJobs = function (type, state, callback) {
-  kue.Job.rangeByType('simple-worker', state, 0, -1, 'asc', (err, results) => {
-    if (err) return callback(err)
-    callback(null, results.filter(x => x.data.handler === type))
-  })
+const listJobs = function (type, state, callback) {
+  worker.listJobs(state)
+    .then(results => callback(null, results.filter(x => x.data.handler === type)))
+    .catch(err => callback(err))
 }
 
 describe('simple-worker', function () {
@@ -26,7 +24,7 @@ describe('simple-worker', function () {
   it('queues a job with the correct options', (done) => {
     worker.queueJob({name: 'test', title: 'Some test job'})
 
-    getJobs('test', 'inactive', (err, jobs) => {
+    listJobs('test', 'inactive', (err, jobs) => {
       expect(err).to.equal(null)
       expect(jobs.length).to.equal(1)
       const job = jobs[0]
@@ -41,6 +39,16 @@ describe('simple-worker', function () {
     })
   })
 
+  it('can list the jobs', async () => {
+    await worker.queueJob({name: 'test', title: 'Some test job'})
+    await worker.queueJob({name: 'test2', title: 'Some other test job'})
+    await worker.queueJob({name: 'test', title: 'Some test job'})
+
+    const jobs = await worker.listJobs('inactive')
+    expect(jobs.length).to.equal(3)
+    expect(jobs.map(x => x.data.handler)).to.deep.equal(['test', 'test2', 'test'])
+  })
+
   it('schedules a job', (done) => {
     worker.queueJob({
       name: 'test',
@@ -49,7 +57,7 @@ describe('simple-worker', function () {
     })
 
     setTimeout(() => {
-      getJobs('test', 'inactive', (err, jobs) => {
+      listJobs('test', 'inactive', (err, jobs) => {
         expect(err).to.equal(null)
         expect(jobs.length).to.equal(3)
         done()
@@ -69,7 +77,7 @@ describe('simple-worker', function () {
     worker.processJobs()
 
     setTimeout(() => {
-      getJobs('test', 'inactive', (err, jobs) => {
+      listJobs('test', 'inactive', (err, jobs) => {
         expect(err).to.equal(null)
         expect(jobs.length).to.equal(0)
         expect(processed).to.equal(true)
@@ -89,7 +97,7 @@ describe('simple-worker', function () {
     worker.processJobs()
 
     setTimeout(() => {
-      getJobs('test', 'inactive', (err, jobs) => {
+      listJobs('test', 'inactive', (err, jobs) => {
         expect(err).to.equal(null)
         expect(jobs.length).to.equal(0)
         done()
@@ -108,7 +116,7 @@ describe('simple-worker', function () {
     worker.processJobs()
 
     setTimeout(() => {
-      getJobs('test', 'inactive', (err, jobs) => {
+      listJobs('test', 'inactive', (err, jobs) => {
         expect(err).to.equal(null)
         expect(jobs.length).to.equal(0)
         done()

@@ -53,6 +53,12 @@ worker.webInterface(3000)
 
 // Start the web interface on port 3000 using a username (foo) and password (bar)
 worker.webInterface(3000, 'foo', 'bar')
+
+// ===== HELPER =====
+
+// List current jobs for a specific status (e.g. "inactive")
+worker.listJobs(status)
+// -> [...]
 ```
 
 #### Options for setting up the worker

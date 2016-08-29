@@ -51,7 +51,7 @@ export const webInterface = (port, username, password) => {
 
 // Register a job handler
 export const registerJob = (name, callback) => {
-  debug(`registering job: ${name}`)
+  debug(`(${name}) registered`)
   jobHandlers[name] = callback
 }
 
@@ -60,14 +60,21 @@ export const processJobs = () => {
   debug('starting processing of jobs')
 
   queue.process('simple-worker', (job, done) => {
-    debug('processing job: ' + job.data.handler)
+    debug(`(${job.data.handler}) started processing`)
 
     // Grab the actual job handler
     const callback = jobHandlers[job.data.handler]
 
+    // Overwrite the job function with some logging
+    job._log = job.log
+    job.log = (string) => {
+      debug(`(${job.data.handler}) debug message: ${string}`)
+      return job._log(string)
+    }
+
     // Overwrite the done function with some logging
     const customDone = (err, data) => {
-      debug('job finished processing: ' + job.data.handler)
+      debug(`(${job.data.handler}) finished processing`)
       done(err, data)
     }
 
@@ -93,12 +100,12 @@ export const queueJob = (options) => {
     return _queueJob(options)
   }
 
-  debug(`job scheduled: ${options.name} (${options.schedule})`)
+  debug(`(${options.name}) scheduled ${options.schedule}`)
   schedule.scheduleJob(options.schedule, () => _queueJob(options))
 }
 
 // Queue a job for processing
-const _queueJob = (options) => {
+const _queueJob = (options) => new Promise((resolve, reject) => {
   // Build the data
   options = {...defaultJobOptions, ...options}
   const data = {...options.data, title: options.title, handler: options.name}
@@ -118,9 +125,19 @@ const _queueJob = (options) => {
   // Save for processing later
   job.save((err) => {
     if (err) {
-      return debug('Failed queuing job', options)
+      debug('failed queuing job', options, err)
+      return reject(err)
     }
 
-    debug(`queued job for processing: ${options.name}`)
+    debug(`(${options.name}) queued`)
+    resolve()
   })
-}
+})
+
+// List all currently running jobs
+export const listJobs = (state) => new Promise((resolve, reject) => {
+  kue.Job.rangeByType('simple-worker', state, 0, -1, 'asc', (err, results) => {
+    if (err) return reject(err)
+    resolve(results)
+  })
+})
