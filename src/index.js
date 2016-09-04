@@ -25,6 +25,19 @@ let queue
 // Create the internal queue using kue
 export const setup = (options) => {
   debug('setting up')
+
+  // Make sure we always have a options object
+  options = options || {}
+  options.prefix = options.prefix || 'sw'
+
+  // If the redis options are set, point the "password" to the "auth" key,
+  // since kue does not confirm to the standard node-redis options
+  if (typeof options.redis === 'object' && options.redis.password) {
+    options.redis.auth = options.redis.password
+    delete options.redis.password
+  }
+
+  // Create the queue
   queue = kue.createQueue(options)
 
   // Handle stuck jobs in redis, because the operations are not atomic

@@ -68,14 +68,14 @@ worker.listJobs(status)
 ```js
 worker.setup({
   // Prefix for keys of the queued job
-  prefix: 'q',
+  prefix: 'sw',
   
   // Configuration for node-redis
   // See: https://github.com/NodeRedis/node_redis#options-object-properties
   redis: {
     port: 1234,
     host: '10.0.50.20',
-    auth: 'password'
+    password: 'password'
   }
 })
 ```
