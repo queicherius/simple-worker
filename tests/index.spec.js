@@ -49,6 +49,16 @@ describe('simple-worker', function () {
     expect(jobs.map(x => x.data.handler)).to.deep.equal(['test', 'test2', 'test'])
   })
 
+  it('can clear the jobs', async () => {
+    await worker.queueJob({name: 'test', title: 'Some test job'})
+    await worker.queueJob({name: 'test2', title: 'Some other test job'})
+    await worker.queueJob({name: 'test', title: 'Some test job'})
+
+    await worker.clearJobs('inactive')
+    const jobs = await worker.listJobs('inactive')
+    expect(jobs.length).to.equal(0)
+  })
+
   it('schedules a job', (done) => {
     worker.queueJob({
       name: 'test',

@@ -2,6 +2,7 @@ import kue from 'kue'
 import schedule from 'node-schedule'
 import basicAuth from 'basic-auth-connect'
 import express from 'express'
+import parallelLimit from 'async/parallelLimit'
 const debug = require('debug')('simple-worker')
 
 // Default options of a job
@@ -152,5 +153,18 @@ export const listJobs = (state) => new Promise((resolve, reject) => {
   kue.Job.rangeByType('simple-worker', state, 0, -1, 'asc', (err, results) => {
     if (err) return reject(err)
     resolve(results)
+  })
+})
+
+// Clear jobs by state
+export const clearJobs = (state, num = -1) => new Promise((resolve, reject) => {
+  kue.Job.rangeByState(state, 0, num, 'asc', function (err, jobs) {
+    if (err) return reject(err)
+
+    jobs = jobs.map(job => (cb) => job.remove(() => cb()))
+    parallelLimit(jobs, 1000, (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
   })
 })

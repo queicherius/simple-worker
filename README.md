@@ -59,6 +59,10 @@ worker.webInterface(3000, 'foo', 'bar')
 // List current jobs for a specific status (e.g. "inactive")
 worker.listJobs(status)
 // -> [...]
+
+// Clear jobs of a specific status (e.g. "failed")
+worker.clearJobs(status)
+worker.clearJobs(status, optionalLimit)
 ```
 
 #### Options for setting up the worker
