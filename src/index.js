@@ -80,15 +80,18 @@ export const processJobs = () => {
     const callback = jobHandlers[job.data.handler]
 
     // Overwrite the job function with some logging
+    let start = new Date()
     job._log = job.log
-    job.log = (string) => {
+    job.log = (string, error) => {
+      string = error || string
+      let diff = new Date() - start
       debug(`(${job.data.handler}) debug message: ${string}`)
-      return job._log(string)
+      return job._log(`${string} (+${diff}ms)`)
     }
 
     // Overwrite the done function with some logging
     const customDone = (err, data) => {
-      debug(`(${job.data.handler}) finished processing`)
+      debug(`(${job.data.handler}) finished processing ${err ? '(with error)' : ''}`)
       done(err, data)
     }
 

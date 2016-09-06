@@ -81,6 +81,7 @@ describe('simple-worker', function () {
 
     worker.registerJob('test', (job, done) => {
       processed = true
+      job.log('Hey there')
       done()
     })
 
@@ -101,7 +102,7 @@ describe('simple-worker', function () {
     worker.queueJob({name: 'test', title: 'Some test job'})
 
     worker.registerJob('test', (job, done) => {
-      throw new Error('Welp')
+      throw new Error('Oh no.')
     })
 
     worker.processJobs()
@@ -120,7 +121,7 @@ describe('simple-worker', function () {
     worker.queueJob({name: 'test', title: 'Some test job'})
 
     worker.registerJob('test', async (job, done) => {
-      throw new Error('Welp')
+      throw new Error('Welp.')
     })
 
     worker.processJobs()
