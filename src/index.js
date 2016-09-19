@@ -14,7 +14,8 @@ const defaultJobOptions = {
   ttl: 60 * 60 * 1000,
   callback: () => false,
   delay: false,
-  schedule: false
+  schedule: false,
+  removeOnComplete: true
 }
 
 // The registered job handlers
@@ -134,6 +135,7 @@ const _queueJob = (options) => new Promise((resolve, reject) => {
     .backoff(options.backoff)
     .ttl(options.ttl)
     .delay(options.delay)
+    .removeOnComplete(options.removeOnComplete)
 
   // Attach callbacks
   job.on('complete', (result) => options.callback(null, result))
