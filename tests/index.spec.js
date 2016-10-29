@@ -1,5 +1,5 @@
 /* eslint-env node, mocha */
-const expect = require('chai').expect
+import {expect} from 'chai'
 import * as worker from '../src/index'
 const queue = worker.setup()
 

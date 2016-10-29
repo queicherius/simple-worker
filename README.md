@@ -120,7 +120,7 @@ import worker from 'simple-worker'
 const clusterSize = os.cpus().length * 3
 
 if (cluster.isMaster) {
-  for (var i = 0; i < clusterSize; i++) {
+  for (let i = 0; i < clusterSize; i++) {
     cluster.fork()
   }
 } else {

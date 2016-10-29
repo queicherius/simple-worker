@@ -3,7 +3,8 @@ import schedule from 'node-schedule'
 import basicAuth from 'basic-auth-connect'
 import express from 'express'
 import parallelLimit from 'async/parallelLimit'
-const debug = require('debug')('simple-worker')
+import _debug from 'debug'
+const debug = _debug('simple-worker')
 
 // Default options of a job
 const defaultJobOptions = {

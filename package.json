@@ -4,30 +4,15 @@
   "description": "A drop-dead simple priority job queue, based on kue",
   "main": "./build/index.js",
   "scripts": {
-    "prepublish": "npm run build",
-    "build": "./node_modules/.bin/babel src/ -d build/",
-    "test": "./node_modules/babel-cli/bin/babel-node.js ./node_modules/.bin/isparta cover --include-all-sources ./node_modules/.bin/_mocha -- tests/ --recursive && node node_modules/snazzy/bin/cmd.js"
+    "version": "abc build",
+    "build": "abc build",
+    "test": "abc test && abc lint"
   },
   "author": "queicherius@gmail.com",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/queicherius/simple-worker"
-  },
-  "devDependencies": {
-    "babel-eslint": "^4.1.6",
-    "chai": "^3.4.1",
-    "codecov": "^1.0.1",
-    "isparta": "^4.0.0",
-    "mocha": "^2.3.4",
-    "sinon": "^1.17.3",
-    "snazzy": "^2.0.1",
-    "babel-cli": "^6.4.5",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-stage-0": "^6.3.13"
-  },
-  "standard": {
-    "parser": "babel-eslint"
   },
   "dependencies": {
     "async": "^2.0.1",
@@ -36,5 +21,8 @@
     "express": "^4.14.0",
     "kue": "^0.11.1",
     "node-schedule": "^1.1.1"
+  },
+  "devDependencies": {
+    "abc-environment": "^1.0.12"
   }
 }
