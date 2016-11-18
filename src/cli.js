@@ -80,7 +80,7 @@ function executeInline (args) {
 function doneOverwrite (err, result) {
   if (err) {
     log.error(`An error occurred in the job:\n${err}`)
-    process.exit(1)
+    return process.exit(1)
   }
 
   result = result ? `\n${result}` : ''
