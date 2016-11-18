@@ -4,6 +4,7 @@ import basicAuth from 'basic-auth-connect'
 import express from 'express'
 import parallelLimit from 'async/parallelLimit'
 import _debug from 'debug'
+import _cli from './cli.js'
 const debug = _debug('simple-worker')
 
 // Default options of a job
@@ -65,6 +66,9 @@ export const webInterface = (port, username, password) => {
   server.listen(port)
 }
 
+// Run the CLI handler
+export const cli = (options) => _cli(options)
+
 // Register a job handler
 export const registerJob = (name, callback) => {
   debug(`(${name}) registered`)
@@ -77,36 +81,45 @@ export const processJobs = () => {
 
   queue.process('simple-worker', (job, done) => {
     debug(`(${job.data.handler}) started processing`)
-
-    // Grab the actual job handler
-    const callback = jobHandlers[job.data.handler]
-
-    // Overwrite the job function with some logging
-    let start = new Date()
-    job._log = job.log
-    job.log = (string, error) => {
-      string = error || string
-      let diff = new Date() - start
-      debug(`(${job.data.handler}) debug message: ${string}`)
-      return job._log(`${string} (+${diff}ms)`)
-    }
-
-    // Overwrite the done function with some logging
-    const customDone = (err, data) => {
-      debug(`(${job.data.handler}) finished processing ${err ? '(with error)' : ''}`)
-      done(err, data)
-    }
-
-    // Execute the job and catch all possible errors (promise / synchronous)
-    try {
-      const jobPromise = callback(job, customDone)
-      if (jobPromise !== undefined && typeof jobPromise.catch === 'function') {
-        jobPromise.catch(err => customDone(err, null))
-      }
-    } catch (err) {
-      customDone(err, null)
-    }
+    processJob(job, done)
   })
+}
+
+// Process a single job
+export const processJob = (job, done) => {
+  // Enrich the job logger with some additional timing information
+  let start = new Date()
+  job._log = job.log
+  job.log = (string, error) => {
+    string = error || string
+    let diff = new Date() - start
+    debug(`(${job.data.handler}) debug message: ${string}`)
+    return job._log(`${string} (+${diff}ms)`)
+  }
+
+  // Overwrite the done function with some logging
+  const customDone = (err, data) => {
+    debug(`(${job.data.handler}) finished processing ${err ? '(with error)' : ''}`)
+    done(err, data)
+  }
+
+  // Grab the actual job handler
+  const callback = jobHandlers[job.data.handler]
+
+  // Exit out if there is no callback defined
+  if (!callback) {
+    return customDone('Job handler is not defined')
+  }
+
+  // Execute the job and catch all possible errors (promise / synchronous)
+  try {
+    const jobPromise = callback(job, customDone)
+    if (jobPromise !== undefined && typeof jobPromise.catch === 'function') {
+      jobPromise.catch(err => customDone(err, null))
+    }
+  } catch (err) {
+    customDone(err, null)
+  }
 }
 
 // Queue a job for processing or schedule a job
