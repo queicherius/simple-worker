@@ -3,6 +3,7 @@ import schedule from 'node-schedule'
 import basicAuth from 'basic-auth-connect'
 import express from 'express'
 import parallelLimit from 'async/parallelLimit'
+import Duration from 'duration'
 import _debug from 'debug'
 import _cli from './cli.js'
 const debug = _debug('simple-worker')
@@ -88,13 +89,19 @@ export const processJobs = () => {
 // Process a single job
 export const processJob = (job, done) => {
   // Enrich the job logger with some additional timing information
-  let start = new Date()
+  let jobStart = new Date()
+  let taskStart = new Date()
+
   job._log = job.log
   job.log = (string, error) => {
     string = error || string
-    let diff = new Date() - start
+
+    let taskDuration = formatDuration(new Date() - taskStart)
+    let jobDuration = formatDuration(new Date() - jobStart)
+    taskStart = new Date()
+
     debug(`(${job.data.handler}) debug message: ${string}`)
-    return job._log(`${string} (+${diff}ms)`)
+    return job._log(`${string} ( Δ ${taskDuration} | Σ ${jobDuration} )`)
   }
 
   // Overwrite the done function with some logging
@@ -120,6 +127,12 @@ export const processJob = (job, done) => {
   } catch (err) {
     customDone(err, null)
   }
+}
+
+// Format a duration as a human readable string
+function formatDuration (ms) {
+  let duration = new Duration(new Date(0), new Date(ms))
+  return duration.toString(1)
 }
 
 // Queue a job for processing or schedule a job
