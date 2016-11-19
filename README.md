@@ -7,65 +7,103 @@
 
 ## Install
 
-```
+```bash
 npm install simple-worker
 ```
 
-## Usage
+## Basic usage
+
+### Producer
+
+The producer queues jobs for the consumer to work on later / when processing power is available. You can queue jobs anywhere in your application or have a dedicated process for it, e.g. to schedule jobs at regular time invervals.
 
 ```js
-import * as worker from 'simple-worker'
-
-// ===== PRODUCER =====
+import {setup, queueJob} from 'simple-worker'
 
 // Setup the worker
-worker.setup()
+setup()
 
 // Queue a job for consumption
-worker.queueJob({
+queueJob({
   name: 'send-email',
   title: 'Sending an email to bib',
   data: {receiver: 'bib@bob.com'}
 })
 
-// ===== CONSUMER =====
+// Queue a job every minute
+queueJob({
+  name: 'check-ping',
+  title: 'Check the ping of our website',
+  data: {url: 'http://mywebsite.com'}
+  schedule: '* * * * *'
+})
+```
+
+### Consumer / Worker
+
+The consumer registers handler functions for the jobs by name and then works on incoming jobs. This should be a dedicated process, because it may block the event loop.
+
+```js
+import {setup, registerJobs, processJobs} from 'simple-worker'
 
 // Setup the worker
-worker.setup()
+setup()
 
 // Register the "handler" function connected to the job
-worker.registerJob('send-email', (job, done) => {
+registerJob('send-email', (job, done) => {
   console.log('Sending email an email to ' + job.data.receiver)
   done()
 })
 
 // Process incoming jobs, sequentially. For parallel processing,
 // spawn multiple processes, e.g. using the "cluster" module (see below)
-worker.processJobs()
-
-// ===== WEB INTERFACE =====
-
-// Setup the worker
-worker.setup()
-
-// Start the web interface on port 3000
-worker.webInterface(3000)
-
-// Start the web interface on port 3000 using a username (foo) and password (bar)
-worker.webInterface(3000, 'foo', 'bar')
-
-// ===== HELPER =====
-
-// List current jobs for a specific status (e.g. "inactive")
-worker.listJobs(status)
-// -> [...]
-
-// Clear jobs of a specific status (e.g. "failed")
-worker.clearJobs(status)
-worker.clearJobs(status, optionalLimit)
+processJobs()
 ```
 
-#### Options for setting up the worker
+### CLI
+
+With some basic setup you can get a CLI for queueing and executing jobs straight form the command line.
+
+```js
+import {setup, registerJob, cli} from 'simple-worker'
+
+// Setup the worker
+setup()
+
+// Register the job handler function (same as in the consumer)
+// This is needed for inline execution and is not required for queued processing
+registerJob(...)
+
+// Start the CLI
+cli()
+
+// Optionally you can also pass an array of exiting job names, which will be used for
+// displaying a list of available jobs and validating user input
+cli({
+  validNames: ['send-email']
+})
+```
+
+### Web Interface
+
+You can also easily set up a web interface for the worker, which will show you statistics about running, queued and finished / failed jobs.
+
+```js
+import {setup, webInterface} from 'simple-worker'
+
+// Setup the worker
+setup()
+
+// Start the web interface on port 3000
+webInterface(3000)
+
+// Start the web interface on port 3000 using a username (foo) and password (bar)
+webInterface(3000, 'foo', 'bar')
+```
+
+## Advanced Usage
+
+### Options for setting up the worker
 
 `setup` takes an object of options with which you can e.g. customise the connection to redis:
 
@@ -84,7 +122,7 @@ worker.setup({
 })
 ```
 
-#### Options for creating jobs
+### Options for creating jobs
 
 `createJob` takes multiple different options with which you can customise the behaviour:
 
@@ -99,7 +137,7 @@ worker.setup({
 - **`delay`** - How long a job should be delayed before getting processed (in ms) or a `Date` in the future. Default: `false`
 - **`callback`** - A function getting called when the job exists with `done`. Typical node callback with the structure `(err, result)`. Default: `noop`
 
-#### Job handler function
+### Job handler function
 
 `registerJob` takes a handler function with a `job` object and a `done` function. It offers the following functions:
 
@@ -108,10 +146,14 @@ worker.setup({
 - **`done(new Error('Oh no.'))`** - Exit a job with an error (gets passed to the optional callback)
 - **`done(null, 'Yay!')`** - Exit a job with a successful result (gets passed to the optional callback)
 
+### Helpers
+
+- `listJobs(status)` - Lists the current jobs for a specific status (e.g. "inactive")
+- `clearJobs(status, [limit])` - Clears jobs of a specific status (e.g. failed) with an optional limit of jobs
+
 ## Example for clustering
 
-Below is an example of how you might cluster the processing part of this module. 
-Another option would be using something like [pm2](https://github.com/Unitech/pm2).
+Below is an example of how you might cluster the processing part of this module. Another (recommended) option would be using something like [pm2](https://github.com/Unitech/pm2).
 
 ```js
 import cluster from 'cluster'
@@ -133,15 +175,15 @@ if (cluster.isMaster) {
 ## Debugging
 
 This module uses [`debug`](https://github.com/visionmedia/debug),
-so you can inspect what it does after setting the environment `DEBUG='simple-worker'
+so you can inspect what it does after setting the environment `DEBUG='simple-worker'`
 
 ## Testing
 
-You can test `simple-worker` [the same way that `kue` can be tested](https://github.com/Automattic/kue#testing).
+You can test `simple-worker` the same way [that `kue` can be tested](https://github.com/Automattic/kue#testing).
 
 ## Tests
 
-```
+```bash
 npm test
 ```
 
