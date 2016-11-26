@@ -1,7 +1,6 @@
 /* eslint-env node, mocha */
 import {expect} from 'chai'
 import * as worker from '../src/index'
-let queue = false
 
 const listJobs = function (type, state, callback) {
   worker.listJobs(state)
@@ -48,18 +47,8 @@ describe('simple-worker', function () {
 
   // Before each test shut down any running processing handlers,
   // start a new queue, wait for the redis connection and then flush queued jobs
-  beforeEach((done) => {
-    if (queue) {
-      queue.shutdown(0)
-    }
-
-    setTimeout(() => {
-      queue = worker.setup()
-    }, 10)
-
-    setTimeout(() => {
-      queue.client.flushdb(done)
-    }, 20)
+  beforeEach(async () => {
+    await worker.reset()
   })
 
   describe('processing', () => {

@@ -54,6 +54,21 @@ export const setup = (options) => {
   return queue
 }
 
+// Restart the worker while flushing all jobs and processing handlers
+export const reset = () => new Promise((resolve) => {
+  if (queue) {
+    queue.shutdown(0)
+  }
+
+  setTimeout(() => {
+    setup()
+  }, 25)
+
+  setTimeout(() => {
+    queue.client.flushdb(resolve)
+  }, 50)
+})
+
 // Start the web interface
 export const webInterface = (port, username, password) => {
   const server = express()

@@ -187,6 +187,8 @@ You can test `simple-worker` the same way [that `kue` can be tested](https://git
 npm test
 ```
 
+> **Note:** Be aware that the tests are flushing the used redis database
+
 ## Licence
 
 MIT
