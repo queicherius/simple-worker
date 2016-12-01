@@ -4,6 +4,7 @@ import basicAuth from 'basic-auth-connect'
 import express from 'express'
 import parallelLimit from 'async/parallelLimit'
 import Duration from 'duration'
+import os from 'os'
 import _debug from 'debug'
 import _cli from './cli.js'
 const debug = _debug('simple-worker')
@@ -121,6 +122,7 @@ export const processJob = (job, done) => {
 
   // Overwrite the done function with some logging
   const customDone = (err, data) => {
+    job.log(`Finished processing at ${(new Date()).toISOString()}`)
     debug(`(${job.data.handler}) finished processing ${err ? '(with error)' : ''}`)
     done(err, data)
   }
@@ -135,6 +137,7 @@ export const processJob = (job, done) => {
 
   // Execute the job and catch all possible errors (promise / synchronous)
   try {
+    job.log(`Started processing on '${os.hostname()}' at ${(new Date()).toISOString()}`)
     const jobPromise = callback(job, customDone)
     if (jobPromise !== undefined && typeof jobPromise.catch === 'function') {
       jobPromise.catch(err => customDone(err, null))
