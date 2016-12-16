@@ -25,6 +25,7 @@
     "redis": "^2.6.3"
   },
   "devDependencies": {
-    "abc-environment": "^1.0.12"
+    "abc-environment": "^1.0.12",
+    "sleep-promise": "^2.0.0"
   }
 }

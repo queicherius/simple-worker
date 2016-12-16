@@ -1,3 +1,4 @@
+/* global process */
 import commander from 'commander'
 import chalk from 'chalk'
 import {queueJob, processJob} from './index.js'
