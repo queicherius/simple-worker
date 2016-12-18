@@ -1,5 +1,6 @@
 import redis from 'redis'
 import async from 'async'
+import _sum from 'sum-by'
 let prefix = 'sw:monit:'
 let client
 
@@ -65,6 +66,8 @@ export function getData () {
   })
 }
 
+const baseStats = {queued: 0, active: 0, completed: 0, timeout: 0, failed: 0}
+
 function getJobData (name, callback) {
   // Get the job stats (queued, active, failed, etc)
   client.hgetall(`${prefix}job:${name}`, (err, stats) => {
@@ -74,10 +77,14 @@ function getJobData (name, callback) {
     client.lrange(`${prefix}job:history:${name}`, 0, -1, (err, history) => {
       if (err) return callback(err)
 
-      // Parse data propperly
+      // Parse the stats into numbers and merge with the base stats
       Object.keys(stats).map(key => {
         stats[key] = parseInt(stats[key], 10)
       })
+      stats = {...baseStats, ...stats}
+      stats.total = _sum(Object.values(stats))
+
+      // Parse the history
       history = history.map(JSON.parse)
 
       // Give back the data for the job

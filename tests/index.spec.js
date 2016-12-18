@@ -180,7 +180,7 @@ describe('simple-worker', function () {
       const jobs = await worker.monitoring.getData()
       expect(jobs.length).to.equal(1)
       expect(jobs[0].name).to.equal('test-queued')
-      expect(jobs[0].stats).to.deep.equal({queued: 1})
+      expect(jobs[0].stats).to.deep.equal({queued: 1, active: 0, completed: 0, timeout: 0, failed: 0, total: 1})
       expect(jobs[0].history.length).to.equal(0)
     })
 
@@ -197,7 +197,7 @@ describe('simple-worker', function () {
         const jobs = await worker.monitoring.getData()
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-active')
-        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 1})
+        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 1, completed: 0, timeout: 0, failed: 0, total: 1})
         expect(jobs[0].history.length).to.equal(0)
         done()
       }, 500)
@@ -214,7 +214,7 @@ describe('simple-worker', function () {
         const jobs = await worker.monitoring.getData()
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-completed')
-        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 1})
+        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 1, timeout: 0, failed: 0, total: 1})
         expect(jobs[0].history.length).to.equal(1)
         expect(jobs[0].history[0].length).to.equal(3)
         expect(jobs[0].history[0][0]).to.be.a.number
@@ -235,7 +235,7 @@ describe('simple-worker', function () {
         const jobs = await worker.monitoring.getData()
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-failed')
-        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, failed: 1})
+        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 0, timeout: 0, failed: 1, total: 1})
         expect(jobs[0].history.length).to.equal(1)
         expect(jobs[0].history[0].length).to.equal(3)
         expect(jobs[0].history[0][0]).to.be.a.number
@@ -257,7 +257,7 @@ describe('simple-worker', function () {
         const jobs = await worker.monitoring.getData()
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-ttl')
-        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, timeout: 1})
+        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 0, timeout: 1, failed: 0, total: 1})
         expect(jobs[0].history.length).to.equal(1)
         expect(jobs[0].history[0].length).to.equal(3)
         expect(jobs[0].history[0][0]).to.be.a.number
