@@ -7,6 +7,7 @@ import Duration from 'duration'
 import os from 'os'
 import _debug from 'debug'
 import _cli from './cli.js'
+import * as _monitoring from './monitoring.js'
 const debug = _debug('simple-worker')
 
 // Default options of a job
@@ -28,6 +29,9 @@ let jobHandlers = {}
 // The created queue
 let queue
 
+// The scheduled jobs
+let schedules = []
+
 // Create the internal queue using kue
 export const setup = (options) => {
   debug('setting up')
@@ -36,6 +40,9 @@ export const setup = (options) => {
   options = options || {}
   options.prefix = options.prefix || 'sw'
 
+  // Copy the redis options for the monitoring
+  const redisOptions = {...options.redis}
+
   // If the redis options are set, point the "password" to the "auth" key,
   // since kue does not confirm to the standard node-redis options
   if (typeof options.redis === 'object' && options.redis.password) {
@@ -43,8 +50,9 @@ export const setup = (options) => {
     delete options.redis.password
   }
 
-  // Create the queue
+  // Create the queue and monitoring setup
   queue = kue.createQueue(options)
+  _monitoring.setup(redisOptions)
 
   // Handle stuck jobs in redis, because the operations are not atomic
   // See https://github.com/Automattic/kue#unstable-redis-connections
@@ -56,18 +64,26 @@ export const setup = (options) => {
 }
 
 // Restart the worker while flushing all jobs and processing handlers
-export const reset = () => new Promise((resolve) => {
-  if (queue) {
-    queue.shutdown(0)
+export const reset = () => new Promise((resolve, reject) => {
+  // Cancel running schedules
+  schedules.map(schedule => schedule.cancel())
+  schedules = []
+
+  // If there is no queue, set it up
+  if (!queue) {
+    return runSetup()
   }
 
-  setTimeout(() => {
-    setup()
-  }, 25)
+  // If there is a queue, tear it down and then set it back up
+  queue.shutdown(0, '', (err) => {
+    if (err) return reject(err)
+    runSetup()
+  })
 
-  setTimeout(() => {
+  function runSetup () {
+    setup()
     queue.client.flushdb(resolve)
-  }, 50)
+  }
 })
 
 // Start the web interface
@@ -83,8 +99,9 @@ export const webInterface = (port, username, password) => {
   server.listen(port)
 }
 
-// Run the CLI handler
+// Run the CLI and monitoring handlers
 export const cli = (options) => _cli(options)
+export const monitoring = _monitoring
 
 // Register a job handler
 export const registerJob = (name, callback) => {
@@ -117,13 +134,24 @@ export const processJob = (job, done) => {
     taskStart = new Date()
 
     debug(`(${job.data.handler}) debug message: ${string}`)
-    return job._log(`${string} ( Δ ${taskDuration} | Σ ${jobDuration} )`)
+    job._log(`${string} ( Δ ${taskDuration} | Σ ${jobDuration} )`)
+
+    // Handle TTL errors by triggering done
+    if (error === 'TTL exceeded') {
+      customDone(error)
+    }
   }
 
   // Overwrite the done function with some logging
+  let doneTriggered = false
   const customDone = (err, data) => {
+    if (doneTriggered) return
+
+    doneTriggered = true
+    _monitoring.finish(job.data.handler, err, new Date() - jobStart)
     job.log(`Finished processing at ${(new Date()).toISOString()}`)
     debug(`(${job.data.handler}) finished processing ${err ? '(with error)' : ''}`)
+
     done(err, data)
   }
 
@@ -137,7 +165,9 @@ export const processJob = (job, done) => {
 
   // Execute the job and catch all possible errors (promise / synchronous)
   try {
+    _monitoring.process(job.data.handler)
     job.log(`Started processing on '${os.hostname()}' at ${(new Date()).toISOString()}`)
+
     const jobPromise = callback(job, customDone)
     if (jobPromise !== undefined && typeof jobPromise.catch === 'function') {
       jobPromise.catch(err => customDone(err, null))
@@ -164,7 +194,9 @@ export const queueJob = (options) => {
   }
 
   debug(`(${options.name}) scheduled ${options.schedule}`)
-  schedule.scheduleJob(options.schedule, () => _queueJob(options))
+  schedules.push(
+    schedule.scheduleJob(options.schedule, () => _queueJob(options))
+  )
 }
 
 // Queue a job for processing
@@ -187,6 +219,7 @@ const _queueJob = (options) => new Promise((resolve, reject) => {
   job.on('failed', (err) => options.callback(err, null))
 
   // Save for processing later
+  _monitoring.queue(options.name)
   job.save((err) => {
     if (err) {
       debug('failed queuing job', options, err)
