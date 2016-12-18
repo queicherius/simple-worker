@@ -27,20 +27,26 @@ export function finish (name, error, processingTime) {
   // Decrease the number of active jobs
   client.hincrby(`${prefix}job:${name}`, 'active', -1)
 
-  // Increase the number of completed, timed out or failed jobs
-  // based on if there was an error or not
+  // Increase the number of jobs that finished with this status
+  let status = finishStatus(error)
+  client.hincrby(`${prefix}job:${name}`, status, 1)
+
+  // Push the processing time, status and timestamp into the history
+  const timeData = [processingTime, status, new Date().getTime()]
+  client.lpush(`${prefix}job:history:${name}`, JSON.stringify(timeData))
+  client.ltrim(`${prefix}job:history:${name}`, 0, 999)
+}
+
+function finishStatus (error) {
   if (!error) {
-    client.hincrby(`${prefix}job:${name}`, 'completed', 1)
-  } else if (error === 'TTL exceeded') {
-    client.hincrby(`${prefix}job:${name}`, 'timeout', 1)
-  } else {
-    client.hincrby(`${prefix}job:${name}`, 'failed', 1)
+    return 'completed'
   }
 
-  // Push the processing time into the history
-  const timeData = [processingTime, new Date().getTime()]
-  client.lpush(`${prefix}job:times:${name}`, JSON.stringify(timeData))
-  client.ltrim(`${prefix}job:times:${name}`, 0, 999)
+  if (error === 'TTL exceeded') {
+    return 'timeout'
+  }
+
+  return 'failed'
 }
 
 export function getData () {
@@ -64,18 +70,18 @@ function getJobData (name, callback) {
   client.hgetall(`${prefix}job:${name}`, (err, stats) => {
     if (err) return callback(err)
 
-    // Get the last job times
-    client.lrange(`${prefix}job:times:${name}`, 0, -1, (err, times) => {
+    // Get the job history
+    client.lrange(`${prefix}job:history:${name}`, 0, -1, (err, history) => {
       if (err) return callback(err)
 
       // Parse data propperly
       Object.keys(stats).map(key => {
         stats[key] = parseInt(stats[key], 10)
       })
-      times = times.map(JSON.parse)
+      history = history.map(JSON.parse)
 
       // Give back the data for the job
-      callback(null, {name, stats, times})
+      callback(null, {name, stats, history})
     })
   })
 }

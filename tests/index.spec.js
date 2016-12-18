@@ -181,7 +181,7 @@ describe('simple-worker', function () {
       expect(jobs.length).to.equal(1)
       expect(jobs[0].name).to.equal('test-queued')
       expect(jobs[0].stats).to.deep.equal({queued: 1})
-      expect(jobs[0].times.length).to.equal(0)
+      expect(jobs[0].history.length).to.equal(0)
     })
 
     it('monitors an active job', (done) => {
@@ -198,7 +198,7 @@ describe('simple-worker', function () {
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-active')
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 1})
-        expect(jobs[0].times.length).to.equal(0)
+        expect(jobs[0].history.length).to.equal(0)
         done()
       }, 500)
     })
@@ -215,8 +215,11 @@ describe('simple-worker', function () {
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-completed')
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 1})
-        expect(jobs[0].times.length).to.equal(1)
-        expect(jobs[0].times[0].length).to.equal(2)
+        expect(jobs[0].history.length).to.equal(1)
+        expect(jobs[0].history[0].length).to.equal(3)
+        expect(jobs[0].history[0][0]).to.be.a.number
+        expect(jobs[0].history[0][1]).to.equal('completed')
+        expect(jobs[0].history[0][2]).to.be.a.number
         done()
       }, 500)
     })
@@ -233,8 +236,11 @@ describe('simple-worker', function () {
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-failed')
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, failed: 1})
-        expect(jobs[0].times.length).to.equal(1)
-        expect(jobs[0].times[0].length).to.equal(2)
+        expect(jobs[0].history.length).to.equal(1)
+        expect(jobs[0].history[0].length).to.equal(3)
+        expect(jobs[0].history[0][0]).to.be.a.number
+        expect(jobs[0].history[0][1]).to.equal('failed')
+        expect(jobs[0].history[0][2]).to.be.a.number
         done()
       }, 500)
     })
@@ -252,8 +258,11 @@ describe('simple-worker', function () {
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-ttl')
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, timeout: 1})
-        expect(jobs[0].times.length).to.equal(1)
-        expect(jobs[0].times[0].length).to.equal(2)
+        expect(jobs[0].history.length).to.equal(1)
+        expect(jobs[0].history[0].length).to.equal(3)
+        expect(jobs[0].history[0][0]).to.be.a.number
+        expect(jobs[0].history[0][1]).to.equal('timeout')
+        expect(jobs[0].history[0][2]).to.be.a.number
         done()
       }, 4000)
     })
