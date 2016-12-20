@@ -266,6 +266,30 @@ describe('simple-worker', function () {
         done()
       }, 4000)
     })
+
+    it('monitors retrying jobs correctly', (done) => {
+      worker.queueJob({name: 'test-retry', title: 'Some test job', ttl: 250, attempts: 2, backoff: 150})
+      worker.registerJob('test-retry', async (job, jobDone) => {
+        await sleep(10000)
+        jobDone()
+      })
+      worker.processJobs()
+
+      setTimeout(async () => {
+        const jobs = await worker.monitoring.getData()
+        expect(jobs.length).to.equal(1)
+        expect(jobs[0].name).to.equal('test-retry')
+        expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 0, timeout: 2, failed: 0, total: 2})
+        expect(jobs[0].history.length).to.equal(2)
+        jobs[0].history.map(entry => {
+          expect(entry.length).to.equal(3)
+          expect(entry[0]).to.be.a.number
+          expect(entry[1]).to.equal('timeout')
+          expect(entry[2]).to.be.a.number
+        })
+        done()
+      }, 4000)
+    })
   })
 
   describe('web', () => {

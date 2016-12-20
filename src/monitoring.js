@@ -16,9 +16,11 @@ export function queue (name) {
   client.hincrby(`${prefix}job:${name}`, 'queued', 1)
 }
 
-export function process (name) {
-  // Decrease the number of queued jobs
-  client.hincrby(`${prefix}job:${name}`, 'queued', -1)
+export function process (name, attempts) {
+  // Decrease the number of queued jobs, if this is the first try
+  if (isNaN(attempts)) {
+    client.hincrby(`${prefix}job:${name}`, 'queued', -1)
+  }
 
   // Increase the number of active jobs
   client.hincrby(`${prefix}job:${name}`, 'active', 1)

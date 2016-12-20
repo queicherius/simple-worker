@@ -165,7 +165,7 @@ export const processJob = (job, done) => {
 
   // Execute the job and catch all possible errors (promise / synchronous)
   try {
-    _monitoring.process(job.data.handler)
+    _monitoring.process(job.data.handler, job._attempts)
     job.log(`Started processing on '${os.hostname()}' at ${(new Date()).toISOString()}`)
 
     const jobPromise = callback(job, customDone)
