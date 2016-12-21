@@ -270,7 +270,7 @@ describe('simple-worker', function () {
     it('monitors retrying jobs correctly', (done) => {
       worker.queueJob({name: 'test-retry', title: 'Some test job', ttl: 1000, attempts: 2, backoff: 1000})
       worker.registerJob('test-retry', async (job, jobDone) => {
-        await sleep(10000)
+        await sleep(3000)
         jobDone()
       })
       worker.processJobs()
