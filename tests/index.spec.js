@@ -277,7 +277,6 @@ describe('simple-worker', function () {
 
       setTimeout(async () => {
         const jobs = await worker.monitoring.getData()
-        console.log(JSON.stringify(jobs))
         expect(jobs.length).to.equal(1)
         expect(jobs[0].name).to.equal('test-retry')
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 0, timeout: 2, failed: 0, total: 2})
