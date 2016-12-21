@@ -45,7 +45,7 @@ function fakeCliProcess (options, args, callback) {
 }
 
 describe('simple-worker', function () {
-  this.timeout(10000)
+  this.timeout(20000)
 
   // Before each test shut down any running processing handlers,
   // start a new queue, wait for the redis connection and then flush queued jobs
@@ -289,7 +289,7 @@ describe('simple-worker', function () {
           expect(entry[2]).to.be.a.number
         })
         done()
-      }, 8000)
+      }, 17000)
     })
   })
 
