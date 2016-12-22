@@ -34,7 +34,7 @@ let queue
 let schedules = []
 
 // The timeout for the currently running job
-let jobTimeout = false
+let jobTimeout = {timeout: false, callback: false}
 
 // Create the internal queue using kue
 export const setup = (options) => {
@@ -126,6 +126,15 @@ export const processJobs = () => {
 
 // Process a single job
 export const processJob = (job, done) => {
+  // The next job is getting processed without the previous one
+  // getting marked completed, so we will trigger the timeout function ourselves
+  if (jobTimeout.timeout) {
+    jobTimeout.callback()
+    clearTimeout(jobTimeout.timeout)
+    jobTimeout.timeout = false
+    jobTimeout.function = false
+  }
+
   // Enrich the job logger with some additional timing information
   let jobStart = new Date()
   let taskStart = new Date()
@@ -152,9 +161,10 @@ export const processJob = (job, done) => {
   const customDone = (err, data) => {
     if (doneTriggered) return
 
-    if (jobTimeout) {
-      clearTimeout(jobTimeout)
-      jobTimeout = false
+    if (jobTimeout.timeout) {
+      clearTimeout(jobTimeout.timeout)
+      jobTimeout.timeout = false
+      jobTimeout.function = false
     }
 
     doneTriggered = true
@@ -174,7 +184,11 @@ export const processJob = (job, done) => {
   }
 
   // Timeout handling, because kue sometimes doesn't handle that correctly
-  jobTimeout = setTimeout(() => customDone('TTL exceeded'), job._ttl)
+  const timeoutCallback = () => customDone('TTL exceeded')
+  jobTimeout = {
+    timeout: setTimeout(timeoutCallback, job._ttl),
+    callback: timeoutCallback
+  }
 
   // Execute the job and catch all possible errors (promise / synchronous)
   try {
