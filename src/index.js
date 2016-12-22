@@ -7,6 +7,7 @@ import Duration from 'duration'
 import os from 'os'
 import _debug from 'debug'
 import _cli from './cli.js'
+import _monitoringCli from './monitoring-cli.js'
 import * as _monitoring from './monitoring.js'
 const debug = _debug('simple-worker')
 
@@ -102,6 +103,7 @@ export const webInterface = (port, username, password) => {
 // Run the CLI and monitoring handlers
 export const cli = (options) => _cli(options)
 export const monitoring = _monitoring
+export const monitoringCli = (options) => _monitoringCli(options)
 
 // Register a job handler
 export const registerJob = (name, callback) => {

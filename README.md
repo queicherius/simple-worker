@@ -84,6 +84,20 @@ cli({
 })
 ```
 
+### Monitoring CLI
+
+With some basic setup you can get a CLI for monitoring jobs straight form the command line.
+
+```js
+import {setup, monitoringCli} from 'simple-worker'
+
+// Setup the worker
+setup()
+
+// Start the CLI
+monitoringCli()
+```
+
 ### Web Interface
 
 You can also easily set up a web interface for the worker, which will show you statistics about running, queued and finished / failed jobs.
