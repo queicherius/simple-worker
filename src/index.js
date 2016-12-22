@@ -33,6 +33,9 @@ let queue
 // The scheduled jobs
 let schedules = []
 
+// The timeout for the currently running job
+let jobTimeout = false
+
 // Create the internal queue using kue
 export const setup = (options) => {
   debug('setting up')
@@ -149,6 +152,11 @@ export const processJob = (job, done) => {
   const customDone = (err, data) => {
     if (doneTriggered) return
 
+    if (jobTimeout) {
+      clearTimeout(jobTimeout)
+      jobTimeout = false
+    }
+
     doneTriggered = true
     _monitoring.finish(job.data.handler, err, new Date() - jobStart)
     job.log(`Finished processing at ${(new Date()).toISOString()}`)
@@ -164,6 +172,9 @@ export const processJob = (job, done) => {
   if (!callback) {
     return customDone('Job handler is not defined')
   }
+
+  // Timeout handling, because kue sometimes doesn't handle that correctly
+  jobTimeout = setTimeout(() => customDone('TTL exceeded'), job._ttl)
 
   // Execute the job and catch all possible errors (promise / synchronous)
   try {
