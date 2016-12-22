@@ -45,7 +45,7 @@ function fakeCliProcess (options, args, callback) {
 }
 
 describe('simple-worker', function () {
-  this.timeout(20000)
+  this.timeout(5000)
 
   // Before each test shut down any running processing handlers,
   // start a new queue, wait for the redis connection and then flush queued jobs
@@ -268,9 +268,9 @@ describe('simple-worker', function () {
     })
 
     it('monitors retrying jobs correctly', (done) => {
-      worker.queueJob({name: 'test-retry', title: 'Some test job', ttl: 1000, attempts: 2, backoff: 1000})
+      worker.queueJob({name: 'test-retry', title: 'Some test job', ttl: 250, attempts: 2, backoff: 1000})
       worker.registerJob('test-retry', async (job, jobDone) => {
-        await sleep(3000)
+        await sleep(1000)
         jobDone()
       })
       worker.processJobs()
@@ -288,7 +288,7 @@ describe('simple-worker', function () {
           expect(entry[2]).to.be.a.number
         })
         done()
-      }, 17000)
+      }, 4000)
     })
   })
 
