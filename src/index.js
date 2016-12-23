@@ -33,8 +33,8 @@ let queue
 // The scheduled jobs
 let schedules = []
 
-// The timeout for the currently running job
-let jobTimeout = {timeout: false, callback: false}
+// The monitoring dara for the currently running job
+let jobMonitoring = {timeout: false, callback: false}
 
 // Create the internal queue using kue
 export const setup = (options) => {
@@ -122,18 +122,18 @@ export const processJobs = () => {
     debug(`(${job.data.handler}) started processing`)
     processJob(job, done)
   })
+
+  // Just in case the monitoring didn't trigger
+  queue.on('job complete', (id, result) => jobMonitoringTrigger(null, result))
+  queue.on('job failed', (id, err) => jobMonitoringTrigger(err))
+  queue.on('job failed attempt', (id, err) => jobMonitoringTrigger(err))
 }
 
 // Process a single job
 export const processJob = (job, done) => {
   // The next job is getting processed without the previous one
   // getting marked completed, so we will trigger the timeout function ourselves
-  if (jobTimeout.timeout) {
-    jobTimeout.callback()
-    clearTimeout(jobTimeout.timeout)
-    jobTimeout.timeout = false
-    jobTimeout.function = false
-  }
+  jobMonitoringTrigger('TTL exceeded')
 
   // Enrich the job logger with some additional timing information
   let jobStart = new Date()
@@ -160,12 +160,7 @@ export const processJob = (job, done) => {
   let doneTriggered = false
   const customDone = (err, data) => {
     if (doneTriggered) return
-
-    if (jobTimeout.timeout) {
-      clearTimeout(jobTimeout.timeout)
-      jobTimeout.timeout = false
-      jobTimeout.function = false
-    }
+    jobMonitoringClear()
 
     doneTriggered = true
     _monitoring.finish(job.data.handler, err, new Date() - jobStart)
@@ -184,10 +179,9 @@ export const processJob = (job, done) => {
   }
 
   // Timeout handling, because kue sometimes doesn't handle that correctly
-  const timeoutCallback = () => customDone('TTL exceeded')
-  jobTimeout = {
-    timeout: setTimeout(timeoutCallback, job._ttl),
-    callback: timeoutCallback
+  jobMonitoring = {
+    timeout: setTimeout(() => jobMonitoringTrigger('TTL exceeded'), job._ttl),
+    callback: customDone
   }
 
   // Execute the job and catch all possible errors (promise / synchronous)
@@ -202,6 +196,27 @@ export const processJob = (job, done) => {
   } catch (err) {
     customDone(err, null)
   }
+}
+
+function jobMonitoringTrigger (err, data) {
+  if (!jobMonitoring.timeout) {
+    return
+  }
+
+  // Report back and clear the timeout
+  jobMonitoring.callback(err, data)
+  jobMonitoringClear()
+}
+
+function jobMonitoringClear () {
+  if (!jobMonitoring.timeout) {
+    return
+  }
+
+  // Clear the reporting data
+  clearTimeout(jobMonitoring.timeout)
+  jobMonitoring.timeout = false
+  jobMonitoring.callback = false
 }
 
 // Format a duration as a human readable string
