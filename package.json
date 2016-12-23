@@ -1,6 +1,6 @@
 {
   "name": "simple-worker",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "A drop-dead simple priority job queue, based on kue",
   "main": "./build/index.js",
   "scripts": {
