@@ -130,10 +130,12 @@ export const processJobs = () => {
 }
 
 // Process a single job
-export const processJob = (job, done) => {
+export const processJob = (job, done, cli = false) => {
   // The next job is getting processed without the previous one
   // getting marked completed, so we will trigger the timeout function ourselves
-  jobMonitoringTrigger('TTL exceeded')
+  if (!cli) {
+    jobMonitoringTrigger('TTL exceeded')
+  }
 
   // Enrich the job logger with some additional timing information
   let jobStart = new Date()
@@ -160,7 +162,9 @@ export const processJob = (job, done) => {
   let doneTriggered = false
   const customDone = (err, data) => {
     if (doneTriggered) return
-    jobMonitoringClear()
+    if (!cli) {
+      jobMonitoringClear()
+    }
 
     doneTriggered = true
     _monitoring.finish(job.data.handler, err, new Date() - jobStart)
@@ -186,7 +190,9 @@ export const processJob = (job, done) => {
 
   // Execute the job and catch all possible errors (promise / synchronous)
   try {
-    _monitoring.process(job.data.handler, job._attempts)
+    if (!cli) {
+      _monitoring.process(job.data.handler, job._attempts)
+    }
     job.log(`Started processing on '${os.hostname()}' at ${(new Date()).toISOString()}`)
 
     const jobPromise = callback(job, customDone)

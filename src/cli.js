@@ -75,7 +75,7 @@ function executeInline (args) {
     data: {...args.data, handler: args.name}
   }
 
-  processJob(jobOverwrite, doneOverwrite)
+  processJob(jobOverwrite, doneOverwrite, true)
 }
 
 function doneOverwrite (err, result) {
