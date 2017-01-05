@@ -183,9 +183,11 @@ export const processJob = (job, done, cli = false) => {
   }
 
   // Timeout handling, because kue sometimes doesn't handle that correctly
-  jobMonitoring = {
-    timeout: setTimeout(() => jobMonitoringTrigger('TTL exceeded'), job._ttl),
-    callback: customDone
+  if (!cli) {
+    jobMonitoring = {
+      timeout: setTimeout(() => jobMonitoringTrigger('TTL exceeded'), job._ttl),
+      callback: customDone
+    }
   }
 
   // Execute the job and catch all possible errors (promise / synchronous)
