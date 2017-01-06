@@ -122,21 +122,10 @@ export const processJobs = () => {
     debug(`(${job.data.handler}) started processing`)
     processJob(job, done)
   })
-
-  // Just in case the monitoring didn't trigger
-  queue.on('job complete', (id, result) => jobMonitoringTrigger(null, result))
-  queue.on('job failed', (id, err) => jobMonitoringTrigger(err))
-  queue.on('job failed attempt', (id, err) => jobMonitoringTrigger(err))
 }
 
 // Process a single job
 export const processJob = (job, done, cli = false) => {
-  // The next job is getting processed without the previous one
-  // getting marked completed, so we will trigger the timeout function ourselves
-  if (!cli) {
-    jobMonitoringTrigger('TTL exceeded')
-  }
-
   // Enrich the job logger with some additional timing information
   let jobStart = new Date()
   let taskStart = new Date()
@@ -184,6 +173,7 @@ export const processJob = (job, done, cli = false) => {
 
   // Timeout handling, because kue sometimes doesn't handle that correctly
   if (!cli) {
+    jobMonitoringClear()
     jobMonitoring = {
       timeout: setTimeout(() => jobMonitoringTrigger('TTL exceeded'), job._ttl),
       callback: customDone
