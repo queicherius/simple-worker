@@ -30,7 +30,7 @@
     "sum-by": "^1.0.1"
   },
   "devDependencies": {
-    "abc-environment": "^1.0.12",
+    "abc-environment": "^2.0.0",
     "sleep-promise": "^2.0.0"
   }
 }
