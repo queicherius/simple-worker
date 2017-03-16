@@ -217,9 +217,9 @@ describe('simple-worker', function () {
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 1, timeout: 0, failed: 0, total: 1})
         expect(jobs[0].history.length).to.equal(1)
         expect(jobs[0].history[0].length).to.equal(3)
-        expect(jobs[0].history[0][0]).to.be.a.number
+        expect(typeof jobs[0].history[0][0]).to.equal('number')
         expect(jobs[0].history[0][1]).to.equal('completed')
-        expect(jobs[0].history[0][2]).to.be.a.number
+        expect(typeof jobs[0].history[0][2]).to.equal('number')
         done()
       }, 500)
     })
@@ -238,9 +238,9 @@ describe('simple-worker', function () {
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 0, timeout: 0, failed: 1, total: 1})
         expect(jobs[0].history.length).to.equal(1)
         expect(jobs[0].history[0].length).to.equal(3)
-        expect(jobs[0].history[0][0]).to.be.a.number
+        expect(typeof jobs[0].history[0][0]).to.equal('number')
         expect(jobs[0].history[0][1]).to.equal('failed')
-        expect(jobs[0].history[0][2]).to.be.a.number
+        expect(typeof jobs[0].history[0][2]).to.equal('number')
         done()
       }, 500)
     })
@@ -260,9 +260,9 @@ describe('simple-worker', function () {
         expect(jobs[0].stats).to.deep.equal({queued: 0, active: 0, completed: 0, timeout: 1, failed: 0, total: 1})
         expect(jobs[0].history.length).to.equal(1)
         expect(jobs[0].history[0].length).to.equal(3)
-        expect(jobs[0].history[0][0]).to.be.a.number
+        expect(typeof jobs[0].history[0][0]).to.equal('number')
         expect(jobs[0].history[0][1]).to.equal('timeout')
-        expect(jobs[0].history[0][2]).to.be.a.number
+        expect(typeof jobs[0].history[0][2]).to.equal('number')
         done()
       }, 4000)
     })
@@ -283,9 +283,9 @@ describe('simple-worker', function () {
         expect(jobs[0].history.length).to.equal(2)
         jobs[0].history.map(entry => {
           expect(entry.length).to.equal(3)
-          expect(entry[0]).to.be.a.number
+          expect(typeof entry[0]).to.equal('number')
           expect(entry[1]).to.equal('timeout')
-          expect(entry[2]).to.be.a.number
+          expect(typeof entry[2]).to.equal('number')
         })
         done()
       }, 4000)
