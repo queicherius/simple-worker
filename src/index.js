@@ -44,8 +44,11 @@ export const setup = (options) => {
   options = options || {}
   options.prefix = options.prefix || 'sw'
 
-  // Copy the redis options for the monitoring
-  const redisOptions = {...options.redis}
+  // Copy the redis options for the monitoring, so we don't mutate things
+  // when changing the options for the weird format of kue
+  const redisOptions = typeof options.redis === 'object'
+    ? {...options.redis}
+    : options.redis
 
   // If the redis options are set, point the "password" to the "auth" key,
   // since kue does not confirm to the standard node-redis options
