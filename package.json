@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "abc-environment": "^2.0.0",
-    "sleep-promise": "^2.0.0"
+    "sleep-promise": "^3.0.0"
   }
 }
