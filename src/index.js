@@ -1,4 +1,8 @@
 const Queue = require('bull')
+const scheduler = require('node-schedule')
+const cronstring = require('cronstring')
+
+// TODO timeouts
 
 class SimpleWorker {
   constructor (options) {
@@ -30,7 +34,7 @@ class SimpleWorker {
   add (name, data) {
     this.logger.info('Adding new job to the queue', {name, data})
 
-    const jobData = Object.assign(data, {handler: name})
+    const jobData = Object.assign(data || {}, {handler: name})
     const jobOptions = Object.assign(this.jobConfiguration[name].options, {
       removeOnComplete: true,
       removeOnFail: true
@@ -40,10 +44,22 @@ class SimpleWorker {
   }
 
   schedule () {
-    
+    const scheduable = Object.values(this.jobConfiguration).filter(job => job.scheduling)
+    this.logger.info(`Scheduling ${scheduable.length} repeatable jobs`)
+
+    scheduable.forEach(job => {
+      const schedule = cronstring(job.scheduling) ? cronstring(job.scheduling) : job.scheduling
+      this.logger.info(`Scheduling ${job.name} with schedule "${schedule}"`)
+
+      scheduler.scheduleJob(schedule, () => {
+        this.add(job.name)
+      })
+    })
   }
 
   process () {
+    this.logger.info(`Starting job processing`)
+
     this._queue.process('job', 1, async (job, done) => {
       const {jobName, jobData} = splitJobData(job.data)
       const configuration = this.jobConfiguration[jobName]

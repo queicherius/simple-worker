@@ -10,7 +10,7 @@ const configuration = [
       priority: PRIORITIES.MEDIUM,
       timeout: 5 * 60 * 1000
     },
-    scheduling: 'every hour'
+    scheduling: 'every minute'
   },
   {
     name: 'hackerman',
