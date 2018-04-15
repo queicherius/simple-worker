@@ -17,7 +17,7 @@ const configuration = [
     handler: hackerman,
     options: {
       priority: PRIORITIES.HIGH,
-      timeout: 60 * 1000
+      timeout: 1000
     }
   }
 ]

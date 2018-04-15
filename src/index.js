@@ -2,8 +2,6 @@ const Queue = require('bull')
 const scheduler = require('node-schedule')
 const cronstring = require('cronstring')
 
-// TODO timeouts
-
 class SimpleWorker {
   constructor (options) {
     this.name = options.name
@@ -97,7 +95,7 @@ class SimpleWorker {
 
       // Execute the handler
       try {
-        const result = await configuration.handler(job)
+        const result = await promiseTimeout(configuration.handler(job), job.opts.timeout)
 
         this.logger.info('Job processing completed', {
           jobId: job.id,
@@ -160,6 +158,27 @@ function splitJobData (data) {
   delete jobData.handler
 
   return {jobName, jobData}
+}
+
+function promiseTimeout (promise, ms) {
+  if (!ms) {
+    return promise
+  }
+
+  let timeoutId
+  let timeout = new Promise((resolve, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Job processing timed out after ${ms} ms`))
+    }, ms)
+  })
+
+  return Promise.race([
+    promise,
+    timeout
+  ]).then((result) => {
+    clearTimeout(timeoutId)
+    return result
+  })
 }
 
 module.exports = SimpleWorker
