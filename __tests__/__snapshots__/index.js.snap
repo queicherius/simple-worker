@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SimpleWorker can queue and subsequently process a job 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+    "input": "123",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 2`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+    "input": "123",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 3`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": Object {
+        "handler": "testing-processing",
+        "input": "123",
+      },
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Starting job function",
+    "type": "info",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 4`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": Object {
+        "handler": "testing-processing",
+        "input": "123",
+      },
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Starting job function",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Finished job function",
+    "type": "warn",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "duration": 9001,
+      "jobId": "1",
+      "name": "testing-processing",
+      "result": undefined,
+    },
+    "message": "Job processing completed",
+    "type": "info",
+  },
+]
+`;

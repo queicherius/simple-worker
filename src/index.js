@@ -123,6 +123,15 @@ class SimpleWorker {
     })
   }
 
+  async list () {
+    const jobs = await Promise.all([
+      this._queue.getActive(),
+      this._queue.getWaiting()
+    ])
+
+    return jobs.reduce((arr, x) => arr.concat(x), [])
+  }
+
   pause () {
     return this._queue.pause()
   }
@@ -179,6 +188,10 @@ function promiseTimeout (promise, ms) {
     clearTimeout(timeoutId)
     return result
   })
+}
+
+function validateJobConfiguration () {
+  // TODO
 }
 
 module.exports = SimpleWorker
