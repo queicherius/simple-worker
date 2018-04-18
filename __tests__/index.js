@@ -125,7 +125,59 @@ describe('SimpleWorker', () => {
 
   it('can timeout a long running job')
 
-  it('can handle an error in the job function')
+  it('can handle an error in the job function (async)', async () => {
+    // Create a job to test if error handling is working
+    const jobFunction = async () => {
+      throw new Error('The CPU is on fire.')
+    }
+
+    // Create the queue with the job options
+    const queue = makeTestQueue([{
+      name: 'testing-errors',
+      handler: jobFunction,
+      options: {
+        priority: SimpleWorker.PRIORITIES.HIGH,
+        timeout: 10000
+      }
+    }])
+
+    // Add the job to the queue and process it
+    queue.add('testing-errors')
+    await sleep(250)
+    queue.process()
+    await sleep(250)
+
+    // Expect that the job got removed from the queue and the logs include the error
+    expect((await queue.list()).map(job => job.data)).toEqual([])
+    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+  })
+
+  it('can handle an error in the job function (sync)', async () => {
+    // Create a job to test if error handling is working
+    const jobFunction = () => {
+      throw new Error('The CPU is on fire.')
+    }
+
+    // Create the queue with the job options
+    const queue = makeTestQueue([{
+      name: 'testing-errors',
+      handler: jobFunction,
+      options: {
+        priority: SimpleWorker.PRIORITIES.HIGH,
+        timeout: 10000
+      }
+    }])
+
+    // Add the job to the queue and process it
+    queue.add('testing-errors')
+    await sleep(250)
+    queue.process()
+    await sleep(250)
+
+    // Expect that the job got removed from the queue and the logs include the error
+    expect((await queue.list()).map(job => job.data)).toEqual([])
+    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+  })
 
   it('can add a new job from within a job function')
 

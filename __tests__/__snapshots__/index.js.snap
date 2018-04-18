@@ -17,6 +17,88 @@ Array [
 ]
 `;
 
+exports[`SimpleWorker can handle an error in the job function (async) 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-errors",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 0,
+      "errorMessage": "The CPU is on fire.",
+      "errorStack": "Somewhere over the rainbows",
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing failed",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker can handle an error in the job function (sync) 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-errors",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 0,
+      "errorMessage": "The CPU is on fire.",
+      "errorStack": "Somewhere over the rainbows",
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing failed",
+    "type": "error",
+  },
+]
+`;
+
 exports[`SimpleWorker can queue and subsequently process a job 1`] = `
 Array [
   Object {
