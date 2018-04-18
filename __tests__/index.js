@@ -40,11 +40,11 @@ async function sleep (ms) {
 }
 
 describe('SimpleWorker', () => {
-  test('has PRIORITIES', () => {
+  it('has PRIORITIES', () => {
     expect(Object.keys(SimpleWorker.PRIORITIES)).toEqual(['HIGH', 'MEDIUM', 'LOW'])
   })
 
-  test('can create a new queue instance', () => {
+  it('can create a new queue instance', () => {
     const queue = makeTestQueue([])
     expect(queue.add).not.toBe(undefined)
     expect(queue._logs).toEqual([])
@@ -55,9 +55,10 @@ describe('SimpleWorker', () => {
     let jobWasProcessed = false
     const jobFunction = async (job) => {
       job.info('Starting job function')
-      await sleep(1000)
+      await sleep(500)
+      job.warn('Sleep finished')
       jobWasProcessed = job.data.input
-      job.warn('Finished job function')
+      job.error('Finished job function')
     }
 
     // Create the queue with the job options
@@ -94,6 +95,21 @@ describe('SimpleWorker', () => {
     const queue = makeTestQueue([])
     const error = new Error('Oh no.')
     queue._queue.emit('error', error, 'error running queue')
+    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+  })
+
+  it('logs stalled jobs in the queue', () => {
+    const queue = makeTestQueue([])
+    const job = {
+      id: 333,
+      attemptsMade: 1,
+      data: {
+        handler: 'test-handler',
+        email: 'pepe@me.me'
+      }
+    }
+
+    queue._queue.emit('stalled', job)
     expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
 })

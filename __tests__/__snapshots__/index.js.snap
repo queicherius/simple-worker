@@ -117,8 +117,21 @@ Array [
       "messageData": undefined,
       "name": "testing-processing",
     },
-    "message": "Finished job function",
+    "message": "Sleep finished",
     "type": "warn",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Finished job function",
+    "type": "error",
   },
   Object {
     "data": Object {
@@ -146,6 +159,23 @@ Array [
     },
     "message": "Queue error",
     "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker logs stalled jobs in the queue 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "attempt": 1,
+      "data": Object {
+        "email": "pepe@me.me",
+      },
+      "jobId": 333,
+      "name": "test-handler",
+    },
+    "message": "Job processing stalled",
+    "type": "warn",
   },
 ]
 `;
