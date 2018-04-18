@@ -91,6 +91,34 @@ describe('SimpleWorker', () => {
     expect(jobWasProcessed).toEqual('123')
   })
 
+  it('can flush the queue', async () => {
+    // Create the queue with the job options
+    const queue = makeTestQueue([{
+      name: 'testing-processing',
+      handler: () => false,
+      options: {
+        priority: SimpleWorker.PRIORITIES.HIGH,
+        timeout: 10000
+      }
+    }])
+
+    // Add the jobs to the queue
+    queue.add('testing-processing', {input: '123'})
+    queue.add('testing-processing', {input: '456'})
+    queue.add('testing-processing', {input: '789'})
+
+    // Check if the jobs are in the queue
+    await sleep(250)
+    expect((await queue.list()).map(job => job.data)).toMatchSnapshot()
+
+    // Flush the queue
+    await queue.flush()
+
+    // Expect that the jobs are gone
+    await sleep(250)
+    expect((await queue.list()).map(job => job.data)).toEqual([])
+  })
+
   it('logs errors in the queue', () => {
     const queue = makeTestQueue([])
     const error = new Error('Oh no.')

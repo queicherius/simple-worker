@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SimpleWorker can flush the queue 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+    "input": "123",
+  },
+  Object {
+    "handler": "testing-processing",
+    "input": "456",
+  },
+  Object {
+    "handler": "testing-processing",
+    "input": "789",
+  },
+]
+`;
+
 exports[`SimpleWorker can queue and subsequently process a job 1`] = `
 Array [
   Object {
