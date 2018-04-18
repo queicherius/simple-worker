@@ -91,6 +91,10 @@ describe('SimpleWorker', () => {
     expect(jobWasProcessed).toEqual('123')
   })
 
+  it('can schedule and subsequently process a job')
+
+  it('can pause and resume the queue')
+
   it('can flush the queue', async () => {
     // Create the queue with the job options
     const queue = makeTestQueue([{
@@ -119,7 +123,13 @@ describe('SimpleWorker', () => {
     expect((await queue.list()).map(job => job.data)).toEqual([])
   })
 
-  it('logs errors in the queue', () => {
+  it('can timeout a long running job')
+
+  it('can handle an error in the job function')
+
+  it('can add a new job from within a job function')
+
+  it('logs internal errors in the queue', () => {
     const queue = makeTestQueue([])
     const error = new Error('Oh no.')
     queue._queue.emit('error', error, 'error running queue')
@@ -140,4 +150,16 @@ describe('SimpleWorker', () => {
     queue._queue.emit('stalled', job)
     expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
+
+  it('(setup) errors when the name is invalid')
+
+  it('(setup) errors when the redis connection is invalid')
+
+  it('(setup) errors when the job configuration is invalid')
+
+  it('(setup) errors when the logger is invalid')
+
+  it('(add) errors when the job configuration is missing')
+
+  it('(add) errors when the job configuration is missing while processing')
 })

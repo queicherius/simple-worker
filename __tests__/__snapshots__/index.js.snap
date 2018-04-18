@@ -167,7 +167,7 @@ Array [
 ]
 `;
 
-exports[`SimpleWorker logs errors in the queue 1`] = `
+exports[`SimpleWorker logs internal errors in the queue 1`] = `
 Array [
   Object {
     "data": Object {
