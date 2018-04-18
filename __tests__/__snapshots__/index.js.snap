@@ -136,3 +136,16 @@ Array [
   },
 ]
 `;
+
+exports[`SimpleWorker logs errors in the queue 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "errorMessage": "Oh no.",
+      "errorStack": "Somewhere over the rainbows",
+    },
+    "message": "Queue error",
+    "type": "error",
+  },
+]
+`;

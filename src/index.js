@@ -11,14 +11,14 @@ class SimpleWorker {
 
     this._queue = new Queue(this.name, this.connection)
 
-    this._queue.on('error', function (error) {
+    this._queue.on('error', (error) => {
       this.logger.error('Queue error', {
         errorMessage: error.message,
         errorStack: error.stack
       })
     })
 
-    this._queue.on('stalled', function (job) {
+    this._queue.on('stalled', (job) => {
       const {jobName, jobData} = splitJobData(job.data)
       this.logger.warn('Job processing stalled', {
         jobId: job.id,
@@ -30,14 +30,20 @@ class SimpleWorker {
   }
 
   add (name, data) {
-    this.logger.info('Adding new job to the queue', {name, data})
+    const configuration = this.jobConfiguration[name]
+
+    if (!configuration) {
+      return this.logger.error(`Job configuration not found`, {name: name})
+    }
 
     const jobData = Object.assign(data || {}, {handler: name})
-    const jobOptions = Object.assign(this.jobConfiguration[name].options, {
+    // TODO merge defaults or throw on missing
+    const jobOptions = Object.assign(configuration.options || {}, {
       removeOnComplete: true,
       removeOnFail: true
     })
 
+    this.logger.info('Adding new job to the queue', {name, data})
     return this._queue.add('job', jobData, jobOptions)
   }
 
@@ -63,7 +69,7 @@ class SimpleWorker {
       const configuration = this.jobConfiguration[jobName]
 
       if (!configuration) {
-        return this.logger.error(`Job handler not found`, {name: jobName})
+        return this.logger.error(`Job configuration not found`, {name: jobName})
       }
 
       this.logger.info('Job processing started', {

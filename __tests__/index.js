@@ -1,16 +1,20 @@
 const uuid = require('uuid')
 const SimpleWorker = require('../src/index')
 
+function filterLogData (data) {
+  if (data && data.duration) {
+    data.duration = 9001
+  }
+
+  if (data && data.data && data.data.errorStack) {
+    data.data.errorStack = 'Somewhere over the rainbows'
+  }
+
+  return data
+}
+
 const makeTestQueue = (jobs) => {
   let logs = []
-
-  function filterLogData (data) {
-    if (data && data.duration) {
-      data.duration = 9001
-    }
-
-    return data
-  }
 
   const queue = new SimpleWorker({
     name: uuid(),
@@ -84,5 +88,12 @@ describe('SimpleWorker', () => {
     expect((await queue.list()).map(job => job.data)).toEqual([])
     expect(queue._logs).toMatchSnapshot()
     expect(jobWasProcessed).toEqual('123')
+  })
+
+  it('logs errors in the queue', () => {
+    const queue = makeTestQueue([])
+    const error = new Error('Oh no.')
+    queue._queue.emit('error', error, 'error running queue')
+    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
 })
