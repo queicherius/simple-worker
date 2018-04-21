@@ -1,3 +1,4 @@
+/* eslint-env jest */
 const uuid = require('uuid')
 const SimpleWorker = require('../src/index')
 

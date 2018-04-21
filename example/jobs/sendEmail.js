@@ -20,7 +20,6 @@ async function sendReminders (job) {
 
 async function sendMail (name) {
   // Do fancy async stuff.
-  return
 }
 
 module.exports = sendReminders

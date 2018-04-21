@@ -11,6 +11,8 @@
 npm install simple-worker
 ```
 
+**Requires Node >= 8**
+
 ## Example
 
 An example of how to use this library can be found in `/example`.
