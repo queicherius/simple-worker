@@ -99,6 +99,54 @@ Array [
 ]
 `;
 
+exports[`SimpleWorker can pause and resume the queue 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+  },
+]
+`;
+
+exports[`SimpleWorker can pause and resume the queue 2`] = `
+Array [
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 9001,
+      "jobId": "1",
+      "name": "testing-processing",
+      "result": undefined,
+    },
+    "message": "Job processing completed",
+    "type": "info",
+  },
+]
+`;
+
 exports[`SimpleWorker can queue and subsequently process a job 1`] = `
 Array [
   Object {

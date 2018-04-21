@@ -143,7 +143,38 @@ describe('SimpleWorker', () => {
     expect(jobWasProcessed).toBe(0)
   })
 
-  it('can pause and resume the queue')
+  it('can pause and resume the queue', async () => {
+    let jobWasProcessed = false
+    const jobFunction = async () => {
+      jobWasProcessed = true
+    }
+
+    // Create the queue with the job options
+    const queue = makeTestQueue([{
+      name: 'testing-processing',
+      handler: jobFunction
+    }])
+
+    // Start processing and instantly pause
+    queue.process()
+    await sleep(250)
+    queue.pause()
+
+    // Add the job to the queue
+    queue.add('testing-processing')
+
+    // Check if the job is still in the queue (aka processing is paused)
+    await sleep(1000)
+    expect((await queue.list()).map(job => job.data)).toMatchSnapshot()
+    expect(jobWasProcessed).toEqual(false)
+
+    // Resume and wait until the job should be done
+    queue.resume()
+    await sleep(1000)
+    expect((await queue.list()).map(job => job.data)).toEqual([])
+    expect(queue._logs).toMatchSnapshot()
+    expect(jobWasProcessed).toEqual(true)
+  })
 
   it('can flush the queue', async () => {
     // Create the queue with the job options
