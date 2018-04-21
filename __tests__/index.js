@@ -2,7 +2,7 @@ const uuid = require('uuid')
 const SimpleWorker = require('../src/index')
 
 function filterLogData (data) {
-  if (data && data.duration) {
+  if (data && typeof data.duration !== 'undefined') {
     data.duration = 9001
   }
 
@@ -91,7 +91,53 @@ describe('SimpleWorker', () => {
     expect(jobWasProcessed).toEqual('123')
   })
 
-  it('can schedule and subsequently process a job')
+  it('can schedule and subsequently process a job', async () => {
+    // Create a job
+    let jobWasProcessed = 0
+    const jobFunction = async () => {
+      jobWasProcessed++
+    }
+
+    // Create the queue with the job options
+    const queue = makeTestQueue([
+      {
+        name: 'testing-processing',
+        handler: jobFunction,
+        options: {
+          priority: SimpleWorker.PRIORITIES.HIGH,
+          timeout: 10000
+        },
+        scheduling: '* * * * * *' // every second
+      },
+      {
+        name: 'testing-processing-2',
+        handler: jobFunction,
+        options: {
+          priority: SimpleWorker.PRIORITIES.HIGH,
+          timeout: 10000
+        },
+        scheduling: 'every day'
+      },
+      {
+        name: 'testing-processing-3',
+        handler: jobFunction,
+        options: {
+          priority: SimpleWorker.PRIORITIES.HIGH,
+          timeout: 10000
+        }
+      }
+    ])
+
+    // Start the queue scheduler
+    expect((await queue.list()).map(job => job.data)).toEqual([])
+    queue.schedule()
+
+    // Expect that the job got queued at least 2 times
+    await sleep(3000)
+    expect((await queue.list())[0].data).toMatchSnapshot()
+    expect((await queue.list()).length).toBeGreaterThan(2)
+    expect(jobWasProcessed).toBe(0)
+  })
 
   it('can pause and resume the queue')
 

@@ -46,7 +46,7 @@ Array [
     "data": Object {
       "attempt": 0,
       "data": Object {},
-      "duration": 0,
+      "duration": 9001,
       "errorMessage": "The CPU is on fire.",
       "errorStack": "Somewhere over the rainbows",
       "jobId": "1",
@@ -87,7 +87,7 @@ Array [
     "data": Object {
       "attempt": 0,
       "data": Object {},
-      "duration": 0,
+      "duration": 9001,
       "errorMessage": "The CPU is on fire.",
       "errorStack": "Somewhere over the rainbows",
       "jobId": "1",
@@ -247,6 +247,12 @@ Array [
     "type": "info",
   },
 ]
+`;
+
+exports[`SimpleWorker can schedule and subsequently process a job 1`] = `
+Object {
+  "handler": "testing-processing",
+}
 `;
 
 exports[`SimpleWorker logs internal errors in the queue 1`] = `
