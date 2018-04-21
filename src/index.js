@@ -20,6 +20,10 @@ class SimpleWorker {
     this.jobConfiguration = toMap(options.jobs, 'name')
     this.logger = options.logger
 
+    this.connect()
+  }
+
+  connect () {
     this._queue = new BullQueue(this.name, this.connection)
 
     // Setup queue listeners
