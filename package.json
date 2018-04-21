@@ -1,6 +1,6 @@
 {
   "name": "simple-worker",
-  "version": "1.6.6",
+  "version": "2.0.0",
   "description": "A drop-dead simple priority job queue",
   "main": "./src/index.js",
   "scripts": {
