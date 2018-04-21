@@ -1,0 +1,459 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SimpleWorker can add a new job from within a job function 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+  },
+  Object {
+    "handler": "testing-processing-2",
+  },
+]
+`;
+
+exports[`SimpleWorker can add a new job from within a job function 2`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing-2",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+]
+`;
+
+exports[`SimpleWorker can flush the queue 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+    "input": "123",
+  },
+  Object {
+    "handler": "testing-processing",
+    "input": "456",
+  },
+  Object {
+    "handler": "testing-processing",
+    "input": "789",
+  },
+]
+`;
+
+exports[`SimpleWorker can handle an error in the job function (async) 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-errors",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 9001,
+      "errorMessage": "The CPU is on fire.",
+      "errorStack": "Somewhere over the rainbows",
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing failed",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker can handle an error in the job function (sync) 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-errors",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 9001,
+      "errorMessage": "The CPU is on fire.",
+      "errorStack": "Somewhere over the rainbows",
+      "jobId": "1",
+      "name": "testing-errors",
+    },
+    "message": "Job processing failed",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker can pause and resume the processing 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+  },
+]
+`;
+
+exports[`SimpleWorker can pause and resume the processing 2`] = `
+Array [
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 9001,
+      "jobId": "1",
+      "name": "testing-processing",
+      "result": undefined,
+    },
+    "message": "Job processing completed",
+    "type": "info",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+    "input": "123",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 2`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+    "input": "123",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 3`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": Object {
+        "handler": "testing-processing",
+        "input": "123",
+      },
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Starting job function",
+    "type": "info",
+  },
+]
+`;
+
+exports[`SimpleWorker can queue and subsequently process a job 4`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": Object {
+        "handler": "testing-processing",
+        "input": "123",
+      },
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Starting job function",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Sleep finished",
+    "type": "warn",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "jobId": "1",
+      "messageData": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Finished job function",
+    "type": "error",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {
+        "input": "123",
+      },
+      "duration": 9001,
+      "jobId": "1",
+      "name": "testing-processing",
+      "result": undefined,
+    },
+    "message": "Job processing completed",
+    "type": "info",
+  },
+]
+`;
+
+exports[`SimpleWorker can schedule jobs 1`] = `
+Object {
+  "handler": "testing-processing",
+}
+`;
+
+exports[`SimpleWorker can timeout a long running job 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 9001,
+      "errorMessage": "Job processing timed out after 1000 ms",
+      "errorStack": "Somewhere over the rainbows",
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing failed",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker errors when the job configuration is missing while adding 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "name": "not-existing",
+    },
+    "message": "Job configuration not found",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker errors when the job configuration is missing while processing 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "not-existing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "name": "not-existing",
+    },
+    "message": "Job configuration not found",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker logs internal errors in the queue 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "errorMessage": "Oh no.",
+      "errorStack": "Somewhere over the rainbows",
+    },
+    "message": "Queue error",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker logs stalled jobs in the queue 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "attempt": 1,
+      "data": Object {
+        "email": "pepe@me.me",
+      },
+      "jobId": 333,
+      "name": "test-handler",
+    },
+    "message": "Job processing stalled",
+    "type": "warn",
+  },
+]
+`;

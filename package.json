@@ -1,12 +1,11 @@
 {
   "name": "simple-worker",
   "version": "1.6.6",
-  "description": "A drop-dead simple priority job queue, based on kue",
-  "main": "./build/index.js",
+  "description": "A drop-dead simple priority job queue",
+  "main": "./src/index.js",
   "scripts": {
-    "version": "abc build",
-    "build": "abc build",
-    "test": "abc test && abc lint"
+    "test": "jest --forceExit",
+    "lint": "standard"
   },
   "author": "queicherius@gmail.com",
   "license": "MIT",
@@ -15,22 +14,15 @@
     "url": "https://github.com/queicherius/simple-worker"
   },
   "dependencies": {
-    "async": "^2.0.1",
-    "basic-auth-connect": "^1.0.0",
-    "chalk": "^2.0.0",
-    "cli-table": "^0.3.1",
-    "debug": "^3.0.0",
-    "duration": "^0.2.0",
-    "express": "^4.14.0",
-    "kue": "^0.11.1",
-    "node-schedule": "^1.1.1",
-    "pad-right": "^0.2.2",
-    "redis": "^2.6.3",
-    "sparkly": "^3.1.2",
-    "sum-by": "^1.0.1"
+    "bull": "^3.3.10",
+    "cronstring": "^0.0.5",
+    "express": "^4.16.3",
+    "node-schedule": "^1.3.0"
   },
   "devDependencies": {
-    "abc-environment": "^2.0.0",
-    "sleep-promise": "^2.0.0"
+    "codecov": "^3.0.0",
+    "jest": "^22.4.3",
+    "standard": "^11.0.1",
+    "uuid": "^3.2.1"
   }
 }

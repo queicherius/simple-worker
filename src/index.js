@@ -1,296 +1,219 @@
-import kue from 'kue'
-import schedule from 'node-schedule'
-import basicAuth from 'basic-auth-connect'
-import express from 'express'
-import parallelLimit from 'async/parallelLimit'
-import Duration from 'duration'
-import os from 'os'
-import _debug from 'debug'
-import _cli from './cli.js'
-import _monitoringCli from './monitoring-cli.js'
-import * as _monitoring from './monitoring.js'
-const debug = _debug('simple-worker')
+const BullQueue = require('bull')
+const scheduler = require('node-schedule')
+const cronstring = require('cronstring')
 
-// Default options of a job
-const defaultJobOptions = {
-  data: {},
-  priority: 'medium',
-  attempts: 1,
-  backoff: {delay: 30 * 1000, type: 'exponential'},
-  ttl: 60 * 60 * 1000,
-  callback: () => false,
-  delay: false,
-  schedule: false,
-  removeOnComplete: true
-}
-
-// The registered job handlers
-let jobHandlers = {}
-
-// The created queue
-let queue
-
-// The scheduled jobs
-let schedules = []
-
-// The monitoring dara for the currently running job
-let jobMonitoring = {timeout: false, callback: false}
-
-// Create the internal queue using kue
-export const setup = (options) => {
-  debug('setting up')
-
-  // Make sure we always have a options object
-  options = options || {}
-  options.prefix = options.prefix || 'sw'
-
-  // Copy the redis options for the monitoring, so we don't mutate things
-  // when changing the options for the weird format of kue
-  const redisOptions = typeof options.redis === 'object'
-    ? {...options.redis}
-    : options.redis
-
-  // If the redis options are set, point the "password" to the "auth" key,
-  // since kue does not confirm to the standard node-redis options
-  if (typeof options.redis === 'object' && options.redis.password) {
-    options.redis.auth = options.redis.password
-    delete options.redis.password
-  }
-
-  // Create the queue and monitoring setup
-  queue = kue.createQueue(options)
-  _monitoring.setup(redisOptions)
-
-  // Handle stuck jobs in redis, because the operations are not atomic
-  // See https://github.com/Automattic/kue#unstable-redis-connections
-  queue.watchStuckJobs(5 * 1000)
-
-  // Log uncaught errors
-  queue.on('error', (err) => console.error('Uncaught error in simple-worker', err))
-  return queue
-}
-
-// Restart the worker while flushing all jobs and processing handlers
-export const reset = () => new Promise((resolve, reject) => {
-  // Cancel running schedules
-  schedules.map(schedule => schedule.cancel())
-  schedules = []
-
-  // If there is no queue, set it up
-  if (!queue) {
-    return runSetup()
-  }
-
-  // If there is a queue, tear it down and then set it back up
-  queue.shutdown(0, '', (err) => {
-    if (err) return reject(err)
-    runSetup()
-  })
-
-  function runSetup () {
-    setup()
-    queue.client.flushdb(resolve)
-  }
-})
-
-// Start the web interface
-export const webInterface = (port, username, password) => {
-  const server = express()
-  kue.app.set('title', 'Simple worker')
-
-  if (username && password) {
-    server.use(basicAuth(username, password))
-  }
-
-  server.use(kue.app)
-  server.listen(port)
-}
-
-// Run the CLI and monitoring handlers
-export const cli = (options) => _cli(options)
-export const monitoring = _monitoring
-export const monitoringCli = (options) => _monitoringCli(options)
-
-// Register a job handler
-export const registerJob = (name, callback) => {
-  debug(`(${name}) registered`)
-  jobHandlers[name] = callback
-}
-
-// Start the processing of jobs
-export const processJobs = () => {
-  debug('starting processing of jobs')
-
-  queue.process('simple-worker', (job, done) => {
-    debug(`(${job.data.handler}) started processing`)
-    processJob(job, done)
-  })
-}
-
-// Process a single job
-export const processJob = (job, done, cli = false) => {
-  // Enrich the job logger with some additional timing information
-  let jobStart = new Date()
-  let taskStart = new Date()
-
-  job._log = job.log
-  job.log = (string, error) => {
-    string = error || string
-
-    let taskDuration = formatDuration(new Date() - taskStart)
-    let jobDuration = formatDuration(new Date() - jobStart)
-    taskStart = new Date()
-
-    debug(`(${job.data.handler}) debug message: ${string}`)
-    job._log(`${string} ( Δ ${taskDuration} | Σ ${jobDuration} )`)
-
-    // Handle TTL errors by triggering done
-    if (error === 'TTL exceeded') {
-      customDone(error)
+class SimpleWorker {
+  constructor (options) {
+    // Validate the setup options
+    if (
+      !options.name || !options.redis || !options.jobs || !options.logger ||
+      !options.logger.info || !options.logger.warn || !options.logger.error
+    ) {
+      throw new Error('The queue options are not valid.' +
+        'Please supply `name`, `redis`, `jobs`, `logger.info`, `logger.warn` & `logger.error`')
     }
-  }
+    options.jobs.forEach(validateJobConfiguration)
 
-  // Overwrite the done function with some logging
-  let doneTriggered = false
-  const customDone = (err, data) => {
-    if (doneTriggered) return
-    if (!cli) {
-      jobMonitoringClear()
-    }
+    // Setup the internal values
+    this.name = options.name
+    this.connection = options.redis
+    this.jobConfiguration = toMap(options.jobs, 'name')
+    this.logger = options.logger
 
-    doneTriggered = true
-    _monitoring.finish(job.data.handler, err, new Date() - jobStart)
-    job.log(`Finished processing at ${(new Date()).toISOString()}`)
-    debug(`(${job.data.handler}) finished processing ${err ? '(with error)' : ''}`)
+    this._queue = new BullQueue(this.name, this.connection)
 
-    done(err, data)
-  }
-
-  // Grab the actual job handler
-  const callback = jobHandlers[job.data.handler]
-
-  // Exit out if there is no callback defined
-  if (!callback) {
-    return customDone('Job handler is not defined')
-  }
-
-  // Timeout handling, because kue sometimes doesn't handle that correctly
-  if (!cli) {
-    jobMonitoringClear()
-    jobMonitoring = {
-      timeout: setTimeout(() => jobMonitoringTrigger('TTL exceeded'), job._ttl),
-      callback: customDone
-    }
-  }
-
-  // Execute the job and catch all possible errors (promise / synchronous)
-  try {
-    if (!cli) {
-      _monitoring.process(job.data.handler, job._attempts)
-    }
-    job.log(`Started processing on '${os.hostname()}' at ${(new Date()).toISOString()}`)
-
-    const jobPromise = callback(job, customDone)
-    if (jobPromise !== undefined && typeof jobPromise.catch === 'function') {
-      jobPromise.catch(err => customDone(err, null))
-    }
-  } catch (err) {
-    customDone(err, null)
-  }
-}
-
-function jobMonitoringTrigger (err, data) {
-  if (!jobMonitoring.timeout) {
-    return
-  }
-
-  // Report back and clear the timeout
-  jobMonitoring.callback(err, data)
-  jobMonitoringClear()
-}
-
-function jobMonitoringClear () {
-  if (!jobMonitoring.timeout) {
-    return
-  }
-
-  // Clear the reporting data
-  clearTimeout(jobMonitoring.timeout)
-  jobMonitoring.timeout = false
-  jobMonitoring.callback = false
-}
-
-// Format a duration as a human readable string
-function formatDuration (ms) {
-  let duration = new Duration(new Date(0), new Date(ms))
-  return duration.toString(1)
-}
-
-// Queue a job for processing or schedule a job
-export const queueJob = (options) => {
-  if (!options.name || !options.title) {
-    throw new Error("A 'name' and a 'title' have to be provided")
-  }
-
-  if (!options.schedule) {
-    return _queueJob(options)
-  }
-
-  debug(`(${options.name}) scheduled ${options.schedule}`)
-  schedules.push(
-    schedule.scheduleJob(options.schedule, () => _queueJob(options))
-  )
-}
-
-// Queue a job for processing
-const _queueJob = (options) => new Promise((resolve, reject) => {
-  // Build the data
-  options = {...defaultJobOptions, ...options}
-  const data = {...options.data, title: options.title, handler: options.name}
-
-  // Create the job
-  const job = queue.create('simple-worker', data)
-    .priority(options.priority)
-    .attempts(options.attempts)
-    .backoff(options.backoff)
-    .ttl(options.ttl)
-    .delay(options.delay)
-    .removeOnComplete(options.removeOnComplete)
-
-  // Attach callbacks
-  job.on('complete', (result) => options.callback(null, result))
-  job.on('failed', (err) => options.callback(err, null))
-
-  // Save for processing later
-  _monitoring.queue(options.name)
-  job.save((err) => {
-    if (err) {
-      debug('failed queuing job', options, err)
-      return reject(err)
-    }
-
-    debug(`(${options.name}) queued`)
-    resolve()
-  })
-})
-
-// List all currently running jobs
-export const listJobs = (state) => new Promise((resolve, reject) => {
-  kue.Job.rangeByType('simple-worker', state, 0, -1, 'asc', (err, results) => {
-    if (err) return reject(err)
-    resolve(results)
-  })
-})
-
-// Clear jobs by state
-export const clearJobs = (state, num = -1) => new Promise((resolve, reject) => {
-  kue.Job.rangeByState(state, 0, num, 'asc', function (err, jobs) {
-    if (err) return reject(err)
-
-    jobs = jobs.map(job => (cb) => job.remove(() => cb()))
-    parallelLimit(jobs, 1000, (err) => {
-      if (err) return reject(err)
-      resolve()
+    // Setup queue listeners
+    this._queue.on('error', (error) => {
+      this.logger.error('Queue error', {
+        errorMessage: error.message,
+        errorStack: error.stack
+      })
     })
+
+    this._queue.on('stalled', (job) => {
+      const {jobName, jobData} = splitJobData(job.data)
+      this.logger.warn('Job processing stalled', {
+        jobId: job.id,
+        attempt: job.attemptsMade,
+        name: jobName,
+        data: jobData
+      })
+    })
+  }
+
+  add (name, data) {
+    const configuration = this.jobConfiguration[name]
+
+    if (!configuration) {
+      this.logger.error(`Job configuration not found`, {name: name})
+      throw new Error(`Job configuration not found`)
+    }
+
+    const jobData = Object.assign(data || {}, {handler: name})
+    const jobOptions = Object.assign(
+      {priority: SimpleWorker.PRIORITIES.MEDIUM},
+      configuration.options || {},
+      {removeOnComplete: true, removeOnFail: true}
+    )
+
+    this.logger.info('Adding new job to the queue', {name, data})
+    return this._queue.add('job', jobData, jobOptions)
+  }
+
+  schedule () {
+    const schedulable = Object.values(this.jobConfiguration).filter(job => job.scheduling)
+    this.logger.info(`Scheduling ${schedulable.length} repeatable jobs`)
+
+    schedulable.forEach(job => {
+      const schedule = cronstring(job.scheduling) ? cronstring(job.scheduling) : job.scheduling
+      this.logger.info(`Scheduling ${job.name} with schedule "${schedule}"`)
+      scheduler.scheduleJob(schedule, () => this.add(job.name))
+    })
+  }
+
+  process () {
+    this.logger.info(`Starting job processing`)
+
+    this._queue.process('job', 1, async (job, done) => {
+      const {jobName, jobData} = splitJobData(job.data)
+      const configuration = this.jobConfiguration[jobName]
+
+      if (!configuration) {
+        return this.logger.error(`Job configuration not found`, {name: jobName})
+      }
+
+      this.logger.info('Job processing started', {
+        jobId: job.id,
+        attempt: job.attemptsMade,
+        name: jobName,
+        data: jobData
+      })
+
+      // Add a function so that jobs can log into the same logger
+      const sendLogMessage = (type, message, data) => {
+        this.logger[type](message, {
+          jobId: job.id,
+          attempt: job.attemptsMade,
+          name: jobName,
+          data: jobData,
+          messageData: data
+        })
+      }
+      job.info = (message, data) => sendLogMessage('info', message, data)
+      job.warn = (message, data) => sendLogMessage('warn', message, data)
+      job.error = (message, data) => sendLogMessage('error', message, data)
+
+      // Add a function so that jobs can queue additional jobs
+      job.add = (name, data) => this.add(name, data)
+
+      // Setup start date for job duration calculation
+      const start = new Date()
+
+      // Execute the handler
+      try {
+        const result = await promiseTimeout(configuration.handler(job), job.opts.timeout)
+
+        this.logger.info('Job processing completed', {
+          jobId: job.id,
+          attempt: job.attemptsMade,
+          name: jobName,
+          data: jobData,
+          duration: new Date() - start,
+          result
+        })
+
+        done(result)
+      } catch (error) {
+        this.logger.error('Job processing failed', {
+          jobId: job.id,
+          attempt: job.attemptsMade,
+          name: jobName,
+          data: jobData,
+          duration: new Date() - start,
+          errorMessage: error.message,
+          errorStack: error.stack
+        })
+
+        done(null, error)
+      }
+    })
+  }
+
+  async list () {
+    const jobs = await Promise.all([
+      this._queue.getActive(),
+      this._queue.getWaiting()
+    ])
+
+    return jobs.reduce((arr, x) => arr.concat(x), [])
+  }
+
+  pause () {
+    return this._queue.pause()
+  }
+
+  resume () {
+    return this._queue.resume()
+  }
+
+  flush () {
+    return this._queue.empty()
+  }
+}
+
+SimpleWorker.PRIORITIES = {
+  HIGH: 5,
+  MEDIUM: 10,
+  LOW: 20
+}
+
+function toMap (array, key) {
+  let map = {}
+
+  array.forEach(entry => {
+    map[entry[key]] = entry
   })
-})
+
+  return map
+}
+
+function splitJobData (data) {
+  const jobName = data.handler
+  const jobData = Object.assign({}, data)
+  delete jobData.handler
+
+  return {jobName, jobData}
+}
+
+function promiseTimeout (promise, ms) {
+  if (!ms) {
+    return promise
+  }
+
+  let timeoutId
+  let timeout = new Promise((resolve, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Job processing timed out after ${ms} ms`))
+    }, ms)
+  })
+
+  return Promise.race([
+    promise,
+    timeout
+  ]).then((result) => {
+    clearTimeout(timeoutId)
+    return result
+  })
+}
+
+function validateJobConfiguration (job) {
+  if (!job.name) {
+    throw new Error('The job needs a unique name')
+  }
+
+  if (!job.handler) {
+    throw new Error('The job needs a handler function')
+  }
+}
+
+module.exports = SimpleWorker
