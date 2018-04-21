@@ -1,5 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SimpleWorker can add a new job from within a job function 1`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+  },
+  Object {
+    "handler": "testing-processing-2",
+  },
+]
+`;
+
+exports[`SimpleWorker can add a new job from within a job function 2`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing-2",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+]
+`;
+
 exports[`SimpleWorker can flush the queue 1`] = `
 Array [
   Object {
@@ -339,6 +386,43 @@ Array [
       "name": "testing-processing",
     },
     "message": "Job processing failed",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker errors when the job configuration is missing while adding 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "name": "not-existing",
+    },
+    "message": "Job configuration not found",
+    "type": "error",
+  },
+]
+`;
+
+exports[`SimpleWorker errors when the job configuration is missing while processing 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "not-existing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "name": "not-existing",
+    },
+    "message": "Job configuration not found",
     "type": "error",
   },
 ]

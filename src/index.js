@@ -33,7 +33,8 @@ class SimpleWorker {
     const configuration = this.jobConfiguration[name]
 
     if (!configuration) {
-      return this.logger.error(`Job configuration not found`, {name: name})
+      this.logger.error(`Job configuration not found`, {name: name})
+      throw new Error(`Job configuration not found`)
     }
 
     const jobData = Object.assign(data || {}, {handler: name})

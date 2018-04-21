@@ -283,7 +283,33 @@ describe('SimpleWorker', () => {
     expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
 
-  it('can add a new job from within a job function')
+  it('can add a new job from within a job function', async () => {
+    const jobFunction = async (job) => {
+      job.add('testing-processing-2')
+      await sleep(2000)
+    }
+
+    // Create the queue with the job options
+    const queue = makeTestQueue([
+      {
+        name: 'testing-processing',
+        handler: jobFunction
+      },
+      {
+        name: 'testing-processing-2',
+        handler: () => false
+      }
+    ])
+
+    // Add the job to the queue
+    queue.add('testing-processing')
+
+    // Start processing and then check if the new job is in the list
+    queue.process()
+    await sleep(500)
+    expect((await queue.list()).map(job => job.data)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
+  })
 
   it('logs internal errors in the queue', () => {
     const queue = makeTestQueue([])
@@ -315,7 +341,24 @@ describe('SimpleWorker', () => {
 
   it('(setup) errors when the logger is invalid')
 
-  it('(add) errors when the job configuration is missing')
+  it('errors when the job configuration is missing while adding', () => {
+    const queue = makeTestQueue([])
+    expect(() => queue.add('not-existing')).toThrow()
+    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+  })
 
-  it('(add) errors when the job configuration is missing while processing')
+  it('errors when the job configuration is missing while processing', async () => {
+    const queue = makeTestQueue([{
+      name: 'not-existing',
+      handler: () => false
+    }])
+    queue.add('not-existing')
+
+    // Overwrite internals to simulate missing processing handler
+    queue.jobConfiguration = []
+    queue.process()
+    await sleep(250)
+
+    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+  })
 })
