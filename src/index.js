@@ -107,8 +107,9 @@ class SimpleWorker {
       job.warn = (message, data) => sendLogMessage('warn', message, data)
       job.error = (message, data) => sendLogMessage('error', message, data)
 
-      // Add a function so that jobs can queue additional jobs
+      // Add a function so that jobs can queue and list jobs
       job.add = (name, data) => this.add(name, data)
+      job.list = () => this.list()
 
       // Setup start date for job duration calculation
       const start = new Date()
@@ -216,7 +217,7 @@ function validateJobConfiguration (job) {
   }
 
   if (!job.handler) {
-    throw new Error('The job needs a handler function')
+    throw new Error(`The job ${job.name} needs a handler function`)
   }
 }
 

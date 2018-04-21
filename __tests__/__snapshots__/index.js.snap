@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SimpleWorker can add a new job from within a job function 1`] = `
+exports[`SimpleWorker can add and list jobs from within a job function 1`] = `
 Array [
   Object {
     "handler": "testing-processing",
@@ -11,7 +11,18 @@ Array [
 ]
 `;
 
-exports[`SimpleWorker can add a new job from within a job function 2`] = `
+exports[`SimpleWorker can add and list jobs from within a job function 2`] = `
+Array [
+  Object {
+    "handler": "testing-processing",
+  },
+  Object {
+    "handler": "testing-processing-2",
+  },
+]
+`;
+
+exports[`SimpleWorker can add and list jobs from within a job function 3`] = `
 Array [
   Object {
     "data": Object {

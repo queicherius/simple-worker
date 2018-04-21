@@ -285,9 +285,11 @@ describe('SimpleWorker', () => {
     expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
 
-  it('can add a new job from within a job function', async () => {
+  it('can add and list jobs from within a job function', async () => {
+    let listInJob = []
     const jobFunction = async (job) => {
-      job.add('testing-processing-2')
+      await job.add('testing-processing-2')
+      listInJob = (await job.list()).map(job => job.data)
       await sleep(2000)
     }
 
@@ -309,6 +311,7 @@ describe('SimpleWorker', () => {
     // Start processing and then check if the new job is in the list
     queue.process()
     await sleep(500)
+    expect(listInJob).toMatchSnapshot()
     expect((await queue.list()).map(job => job.data)).toMatchSnapshot()
     expect(queue._logs).toMatchSnapshot()
   })
