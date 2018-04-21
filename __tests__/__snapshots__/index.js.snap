@@ -146,7 +146,7 @@ Array [
 ]
 `;
 
-exports[`SimpleWorker can pause and resume the queue 1`] = `
+exports[`SimpleWorker can pause and resume the processing 1`] = `
 Array [
   Object {
     "handler": "testing-processing",
@@ -154,7 +154,7 @@ Array [
 ]
 `;
 
-exports[`SimpleWorker can pause and resume the queue 2`] = `
+exports[`SimpleWorker can pause and resume the processing 2`] = `
 Array [
   Object {
     "data": undefined,

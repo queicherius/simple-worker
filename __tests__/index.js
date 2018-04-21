@@ -143,7 +143,7 @@ describe('SimpleWorker', () => {
     expect(jobWasProcessed).toBe(0)
   })
 
-  it('can pause and resume the queue', async () => {
+  it('can pause and resume the processing', async () => {
     let jobWasProcessed = false
     const jobFunction = async () => {
       jobWasProcessed = true
@@ -333,13 +333,13 @@ describe('SimpleWorker', () => {
     expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
 
-  it('(setup) errors when the name is invalid')
+  it('errors when the name is invalid during setup')
 
-  it('(setup) errors when the redis connection is invalid')
+  it('errors when the redis connection is invalid during setup')
 
-  it('(setup) errors when the job configuration is invalid')
+  it('errors when the job configuration is invalid during setup')
 
-  it('(setup) errors when the logger is invalid')
+  it('errors when the logger is invalid during setup')
 
   it('errors when the job configuration is missing while adding', () => {
     const queue = makeTestQueue([])
