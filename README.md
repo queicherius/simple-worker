@@ -10,3 +10,23 @@
 ```bash
 npm install simple-worker
 ```
+
+## Example
+
+An example of how to use this library can be found in `/example`.
+
+## Usage
+
+TODO: Write propper usage documentation
+
+## Tests
+
+```bash
+npm test
+```
+
+> **Note:** Do not run against production redis instances.
+
+## Licence
+
+MIT
