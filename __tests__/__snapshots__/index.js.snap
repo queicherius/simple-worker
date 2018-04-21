@@ -217,7 +217,6 @@ Array [
   Object {
     "data": Object {
       "data": Object {
-        "handler": "testing-processing",
         "input": "123",
       },
       "name": "testing-processing",
@@ -263,7 +262,6 @@ Array [
   Object {
     "data": Object {
       "data": Object {
-        "handler": "testing-processing",
         "input": "123",
       },
       "name": "testing-processing",

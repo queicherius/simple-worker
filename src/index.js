@@ -49,7 +49,7 @@ class SimpleWorker {
       throw new Error(`Job configuration not found`)
     }
 
-    const jobData = Object.assign(data || {}, {handler: name})
+    const jobData = Object.assign({}, data || {}, {handler: name})
     const jobOptions = Object.assign(
       {priority: SimpleWorker.PRIORITIES.MEDIUM},
       configuration.options || {},
