@@ -1,4 +1,4 @@
-const Queue = require('bull')
+const BullQueue = require('bull')
 const scheduler = require('node-schedule')
 const cronstring = require('cronstring')
 
@@ -20,7 +20,7 @@ class SimpleWorker {
     this.jobConfiguration = toMap(options.jobs, 'name')
     this.logger = options.logger
 
-    this._queue = new Queue(this.name, this.connection)
+    this._queue = new BullQueue(this.name, this.connection)
 
     // Setup queue listeners
     this._queue.on('error', (error) => {
@@ -61,16 +61,13 @@ class SimpleWorker {
   }
 
   schedule () {
-    const scheduable = Object.values(this.jobConfiguration).filter(job => job.scheduling)
-    this.logger.info(`Scheduling ${scheduable.length} repeatable jobs`)
+    const schedulable = Object.values(this.jobConfiguration).filter(job => job.scheduling)
+    this.logger.info(`Scheduling ${schedulable.length} repeatable jobs`)
 
-    scheduable.forEach(job => {
+    schedulable.forEach(job => {
       const schedule = cronstring(job.scheduling) ? cronstring(job.scheduling) : job.scheduling
       this.logger.info(`Scheduling ${job.name} with schedule "${schedule}"`)
-
-      scheduler.scheduleJob(schedule, () => {
-        this.add(job.name)
-      })
+      scheduler.scheduleJob(schedule, () => this.add(job.name))
     })
   }
 

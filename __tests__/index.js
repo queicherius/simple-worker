@@ -156,22 +156,23 @@ describe('SimpleWorker', () => {
       handler: jobFunction
     }])
 
-    // Start processing and instantly pause
+    // Start processing and then directly pause
     queue.process()
     await sleep(250)
     queue.pause()
+    await sleep(250)
 
     // Add the job to the queue
     queue.add('testing-processing')
 
     // Check if the job is still in the queue (aka processing is paused)
-    await sleep(1000)
+    await sleep(500)
     expect((await queue.list()).map(job => job.data)).toMatchSnapshot()
     expect(jobWasProcessed).toEqual(false)
 
     // Resume and wait until the job should be done
     queue.resume()
-    await sleep(1000)
+    await sleep(500)
     expect((await queue.list()).map(job => job.data)).toEqual([])
     expect(queue._logs).toMatchSnapshot()
     expect(jobWasProcessed).toEqual(true)
