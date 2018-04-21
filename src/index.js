@@ -38,11 +38,11 @@ class SimpleWorker {
     }
 
     const jobData = Object.assign(data || {}, {handler: name})
-    // TODO merge defaults or throw on missing
-    const jobOptions = Object.assign(configuration.options || {}, {
-      removeOnComplete: true,
-      removeOnFail: true
-    })
+    const jobOptions = Object.assign(
+      {priority: SimpleWorker.PRIORITIES.MEDIUM},
+      configuration.options || {},
+      {removeOnComplete: true, removeOnFail: true}
+    )
 
     this.logger.info('Adding new job to the queue', {name, data})
     return this._queue.add('job', jobData, jobOptions)
