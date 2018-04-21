@@ -4,7 +4,7 @@
   "description": "A drop-dead simple priority job queue",
   "main": "./src/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --forceExit",
     "lint": "standard"
   },
   "author": "queicherius@gmail.com",

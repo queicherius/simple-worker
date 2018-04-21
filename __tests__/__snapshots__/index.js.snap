@@ -249,10 +249,51 @@ Array [
 ]
 `;
 
-exports[`SimpleWorker can schedule and subsequently process a job 1`] = `
+exports[`SimpleWorker can schedule jobs 1`] = `
 Object {
   "handler": "testing-processing",
 }
+`;
+
+exports[`SimpleWorker can timeout a long running job 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "data": undefined,
+      "name": "testing-processing",
+    },
+    "message": "Adding new job to the queue",
+    "type": "info",
+  },
+  Object {
+    "data": undefined,
+    "message": "Starting job processing",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing started",
+    "type": "info",
+  },
+  Object {
+    "data": Object {
+      "attempt": 0,
+      "data": Object {},
+      "duration": 9001,
+      "errorMessage": "Job processing timed out after 1000 ms",
+      "errorStack": "Somewhere over the rainbows",
+      "jobId": "1",
+      "name": "testing-processing",
+    },
+    "message": "Job processing failed",
+    "type": "error",
+  },
+]
 `;
 
 exports[`SimpleWorker logs internal errors in the queue 1`] = `

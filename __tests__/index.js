@@ -6,6 +6,10 @@ function filterLogData (data) {
     data.duration = 9001
   }
 
+  if (data && data.errorStack) {
+    data.errorStack = 'Somewhere over the rainbows'
+  }
+
   if (data && data.data && data.data.errorStack) {
     data.data.errorStack = 'Somewhere over the rainbows'
   }
@@ -91,7 +95,7 @@ describe('SimpleWorker', () => {
     expect(jobWasProcessed).toEqual('123')
   })
 
-  it('can schedule and subsequently process a job', async () => {
+  it('can schedule jobs', async () => {
     // Create a job
     let jobWasProcessed = 0
     const jobFunction = async () => {
@@ -169,7 +173,30 @@ describe('SimpleWorker', () => {
     expect((await queue.list()).map(job => job.data)).toEqual([])
   })
 
-  it('can timeout a long running job')
+  it('can timeout a long running job', async () => {
+    const jobFunction = async () => {
+      await sleep(10000)
+    }
+
+    // Create the queue with the job options
+    const queue = makeTestQueue([{
+      name: 'testing-processing',
+      handler: jobFunction,
+      options: {
+        priority: SimpleWorker.PRIORITIES.HIGH,
+        timeout: 1000
+      }
+    }])
+
+    // Add the job to the queue and start processing
+    queue.add('testing-processing')
+    queue.process()
+
+    // Wait until the job should be done
+    await sleep(2000)
+    expect((await queue.list()).map(job => job.data)).toEqual([])
+    expect(queue._logs).toMatchSnapshot()
+  })
 
   it('can handle an error in the job function (async)', async () => {
     // Create a job to test if error handling is working
