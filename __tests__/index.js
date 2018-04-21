@@ -333,13 +333,85 @@ describe('SimpleWorker', () => {
     expect(queue._logs.map(filterLogData)).toMatchSnapshot()
   })
 
-  it('errors when the name is invalid during setup')
+  it('errors when the options are missing during setup', () => {
+    expect(() => new SimpleWorker()).toThrow()
+  })
 
-  it('errors when the redis connection is invalid during setup')
+  it('errors when the name is invalid during setup', () => {
+    expect(() => new SimpleWorker({name: ''})).toThrow()
+  })
 
-  it('errors when the job configuration is invalid during setup')
+  it('errors when the redis connection is invalid during setup', () => {
+    expect(() => new SimpleWorker({name: 'test-1'})).toThrow()
+  })
 
-  it('errors when the logger is invalid during setup')
+  it('errors when the job configuration is invalid during setup', () => {
+    expect(() =>
+      new SimpleWorker({
+        name: 'test-1',
+        redis: {
+          host: '127.0.0.1',
+          port: 6379
+        }
+      })
+    ).toThrow()
+
+    expect(() =>
+      new SimpleWorker({
+        name: 'test-1',
+        redis: {
+          host: '127.0.0.1',
+          port: 6379
+        },
+        jobs: [
+          {hi: 'there'}
+        ],
+        logger: {info: () => false, warn: () => false, error: () => false}
+      })
+    ).toThrow()
+
+    expect(() =>
+      new SimpleWorker({
+        name: 'test-1',
+        redis: {
+          host: '127.0.0.1',
+          port: 6379
+        },
+        jobs: [
+          {name: 'there'}
+        ],
+        logger: {info: () => false, warn: () => false, error: () => false}
+      })
+    ).toThrow()
+  })
+
+  it('errors when the logger is invalid during setup', () => {
+    expect(() =>
+      new SimpleWorker({
+        name: 'test-1',
+        redis: {
+          host: '127.0.0.1',
+          port: 6379
+        },
+        jobs: []
+      })
+    ).toThrow()
+
+    expect(() =>
+      new SimpleWorker({
+        name: 'test-1',
+        redis: {
+          host: '127.0.0.1',
+          port: 6379
+        },
+        jobs: [],
+        logger: {
+          info: () => false,
+          what: () => false
+        }
+      })
+    ).toThrow()
+  })
 
   it('errors when the job configuration is missing while adding', () => {
     const queue = makeTestQueue([])

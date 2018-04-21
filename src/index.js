@@ -4,6 +4,17 @@ const cronstring = require('cronstring')
 
 class SimpleWorker {
   constructor (options) {
+    // Validate the setup options
+    if (
+      !options.name || !options.redis || !options.jobs || !options.logger ||
+      !options.logger.info || !options.logger.warn || !options.logger.error
+    ) {
+      throw new Error('The queue options are not valid.' +
+        'Please supply `name`, `redis`, `jobs`, `logger.info`, `logger.warn` & `logger.error`')
+    }
+    options.jobs.forEach(validateJobConfiguration)
+
+    // Setup the internal values
     this.name = options.name
     this.connection = options.redis
     this.jobConfiguration = toMap(options.jobs, 'name')
@@ -11,6 +22,7 @@ class SimpleWorker {
 
     this._queue = new Queue(this.name, this.connection)
 
+    // Setup queue listeners
     this._queue.on('error', (error) => {
       this.logger.error('Queue error', {
         errorMessage: error.message,
@@ -197,8 +209,14 @@ function promiseTimeout (promise, ms) {
   })
 }
 
-function validateJobConfiguration () {
-  // TODO
+function validateJobConfiguration (job) {
+  if (!job.name) {
+    throw new Error('The job needs a unique name')
+  }
+
+  if (!job.handler) {
+    throw new Error('The job needs a handler function')
+  }
 }
 
 module.exports = SimpleWorker
