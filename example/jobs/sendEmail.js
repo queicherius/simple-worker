@@ -12,7 +12,7 @@ async function sendReminders (job) {
   })
 
   // You can queue follow up jobs from inside of jobs
-  job.add('hackerman', {target: 'Mainframe'})
+  job.add('hackerman', { target: 'Mainframe' })
 
   // To exit with an error, just throw
   throw new Error('Stuff is broke')

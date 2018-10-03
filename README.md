@@ -11,15 +11,13 @@
 npm install simple-worker
 ```
 
-**Requires Node >= 8**
-
 ## Example
 
 An example of how to use this library can be found in `/example`.
 
 ## Usage
 
-TODO: Write propper usage documentation
+TODO: Write usage documentation. For now, take a look in /example.
 
 ## Tests
 
@@ -27,7 +25,7 @@ TODO: Write propper usage documentation
 npm test
 ```
 
-> **Note:** Do not run against production redis instances.
+> **Important:** Do not run with production redis instances. It will clear them.
 
 ## Licence
 

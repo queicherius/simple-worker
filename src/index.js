@@ -35,7 +35,7 @@ class SimpleWorker {
     })
 
     this._queue.on('stalled', (job) => {
-      const {jobName, jobData} = splitJobData(job.data)
+      const { jobName, jobData } = splitJobData(job.data)
       this.logger.warn('Job processing stalled', {
         jobId: job.id,
         attempt: job.attemptsMade,
@@ -49,18 +49,18 @@ class SimpleWorker {
     const configuration = this.jobConfiguration[name]
 
     if (!configuration) {
-      this.logger.error(`Job configuration not found`, {name: name})
+      this.logger.error(`Job configuration not found`, { name: name })
       throw new Error(`Job configuration not found`)
     }
 
-    const jobData = Object.assign({}, data || {}, {handler: name})
+    const jobData = Object.assign({}, data || {}, { handler: name })
     const jobOptions = Object.assign(
-      {priority: SimpleWorker.PRIORITIES.MEDIUM},
+      { priority: SimpleWorker.PRIORITIES.MEDIUM },
       configuration.options || {},
-      {removeOnComplete: true, removeOnFail: true}
+      { removeOnComplete: true, removeOnFail: true }
     )
 
-    this.logger.info('Adding new job to the queue', {name, data})
+    this.logger.info('Adding new job to the queue', { name, data })
     return this._queue.add('job', jobData, jobOptions)
   }
 
@@ -79,11 +79,11 @@ class SimpleWorker {
     this.logger.info(`Starting job processing`)
 
     this._queue.process('job', 1, async (job, done) => {
-      const {jobName, jobData} = splitJobData(job.data)
+      const { jobName, jobData } = splitJobData(job.data)
       const configuration = this.jobConfiguration[jobName]
 
       if (!configuration) {
-        return this.logger.error(`Job configuration not found`, {name: jobName})
+        return this.logger.error(`Job configuration not found`, { name: jobName })
       }
 
       this.logger.info('Job processing started', {
@@ -187,7 +187,7 @@ function splitJobData (data) {
   const jobData = Object.assign({}, data)
   delete jobData.handler
 
-  return {jobName, jobData}
+  return { jobName, jobData }
 }
 
 function promiseTimeout (promise, ms) {

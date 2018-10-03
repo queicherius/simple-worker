@@ -1,4 +1,4 @@
-const {PRIORITIES} = require('../src/index')
+const { PRIORITIES } = require('../src/index')
 const sendEmail = require('./jobs/sendEmail')
 const hackerman = require('./jobs/hackerman')
 
