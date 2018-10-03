@@ -29,9 +29,9 @@ const makeTestQueue = (jobs) => {
     },
     jobs: jobs,
     logger: {
-      info: (message, data) => logs.push({type: 'info', message, data: filterLogData(data)}),
-      warn: (message, data) => logs.push({type: 'warn', message, data: filterLogData(data)}),
-      error: (message, data) => logs.push({type: 'error', message, data: filterLogData(data)})
+      info: (message, data) => logs.push({ type: 'info', message, data: filterLogData(data) }),
+      warn: (message, data) => logs.push({ type: 'warn', message, data: filterLogData(data) }),
+      error: (message, data) => logs.push({ type: 'error', message, data: filterLogData(data) })
     }
   })
 
@@ -77,7 +77,7 @@ describe('SimpleWorker', () => {
     }])
 
     // Add the job to the queue
-    queue.add('testing-processing', {input: '123'})
+    queue.add('testing-processing', { input: '123' })
 
     // Check if the job is in the queue
     await sleep(250)
@@ -190,9 +190,9 @@ describe('SimpleWorker', () => {
     }])
 
     // Add the jobs to the queue
-    queue.add('testing-processing', {input: '123'})
-    queue.add('testing-processing', {input: '456'})
-    queue.add('testing-processing', {input: '789'})
+    queue.add('testing-processing', { input: '123' })
+    queue.add('testing-processing', { input: '456' })
+    queue.add('testing-processing', { input: '789' })
 
     // Check if the jobs are in the queue
     await sleep(250)
@@ -343,11 +343,11 @@ describe('SimpleWorker', () => {
   })
 
   it('errors when the name is invalid during setup', () => {
-    expect(() => new SimpleWorker({name: ''})).toThrow()
+    expect(() => new SimpleWorker({ name: '' })).toThrow()
   })
 
   it('errors when the redis connection is invalid during setup', () => {
-    expect(() => new SimpleWorker({name: 'test-1'})).toThrow()
+    expect(() => new SimpleWorker({ name: 'test-1' })).toThrow()
   })
 
   it('errors when the job configuration is invalid during setup', () => {
@@ -369,9 +369,9 @@ describe('SimpleWorker', () => {
           port: 6379
         },
         jobs: [
-          {hi: 'there'}
+          { hi: 'there' }
         ],
-        logger: {info: () => false, warn: () => false, error: () => false}
+        logger: { info: () => false, warn: () => false, error: () => false }
       })
     ).toThrow()
 
@@ -383,9 +383,9 @@ describe('SimpleWorker', () => {
           port: 6379
         },
         jobs: [
-          {name: 'there'}
+          { name: 'there' }
         ],
-        logger: {info: () => false, warn: () => false, error: () => false}
+        logger: { info: () => false, warn: () => false, error: () => false }
       })
     ).toThrow()
   })
