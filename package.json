@@ -16,7 +16,7 @@
   "dependencies": {
     "bull": "^3.3.10",
     "cronstring": "^0.0.5",
-    "node-schedule": "^1.3.0"
+    "node-schedule": "^1.3.2"
   },
   "devDependencies": {
     "jest": "^23.6.0",
