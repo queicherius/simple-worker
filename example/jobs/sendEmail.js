@@ -6,10 +6,8 @@ async function sendReminders (job) {
     await sendMail(users[i])
   }
 
-  // Logging can also include additional JSON data
-  job.error(`Something went wrong`, {
-    issue: 'Mainframe is not available'
-  })
+  // Log a simple message
+  job.error('send_reminder_errored')
 
   // You can queue follow up jobs from inside of jobs
   job.add('hackerman', { target: 'Mainframe' })

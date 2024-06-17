@@ -25,19 +25,20 @@ class SimpleWorker {
 
   connect () {
     this._queue = new BullQueue(this.name, this.connection)
+    this.logger.info('job_queue_connection_ready')
 
     // Setup queue listeners
     this._queue.on('error', (error) => {
-      this.logger.error('Queue error', {
-        errorMessage: error.message,
-        errorStack: error.stack
+      this.logger.error('job_queue_connection_error', {
+        error_message: error.message,
+        error_stack: error.stack
       })
     })
 
     this._queue.on('stalled', (job) => {
       const { jobName, jobData } = splitJobData(job.data)
-      this.logger.warn('Job processing stalled', {
-        jobId: job.id,
+      this.logger.warn('job_stalled', {
+        job_id: job.id,
         attempt: job.attemptsMade,
         name: jobName,
         data: jobData
@@ -49,7 +50,7 @@ class SimpleWorker {
     const configuration = this.jobConfiguration[name]
 
     if (!configuration) {
-      this.logger.error(`Job configuration not found`, { name: name })
+      this.logger.error('job_errored', { name, error_message: 'Job configuration not found' })
       throw new Error(`Job configuration not found`)
     }
 
@@ -60,52 +61,51 @@ class SimpleWorker {
       { removeOnComplete: true, removeOnFail: true }
     )
 
-    this.logger.info('Adding new job to the queue', { name, data })
+    this.logger.info('job_queued', { name, data })
     return this._queue.add('job', jobData, jobOptions)
   }
 
   schedule () {
     const schedulable = Object.values(this.jobConfiguration).filter(job => job.scheduling)
-    this.logger.info(`Scheduling ${schedulable.length} repeatable jobs`)
 
     schedulable.forEach(job => {
       const schedule = cronstring(job.scheduling) ? cronstring(job.scheduling) : job.scheduling
-      this.logger.info(`Scheduling ${job.name} with schedule "${schedule}"`)
+      this.logger.info('job_scheduled', { name: job.name, schedule })
       scheduler.scheduleJob(schedule, () => this.add(job.name))
     })
   }
 
   process () {
-    this.logger.info(`Starting job processing`)
+    this.logger.info('job_processing_ready')
 
     this._queue.process('job', 1, async (job, done) => {
       const { jobName, jobData } = splitJobData(job.data)
       const configuration = this.jobConfiguration[jobName]
 
       if (!configuration) {
-        return this.logger.error(`Job configuration not found`, { name: jobName })
+        return this.logger.error('job_errored', { name: jobName, error_message: 'Job configuration not found' })
       }
 
-      this.logger.info('Job processing started', {
-        jobId: job.id,
+      this.logger.info('job_started', {
+        job_id: job.id,
         attempt: job.attemptsMade,
         name: jobName,
         data: jobData
       })
 
       // Add a function so that jobs can log into the same logger
-      const sendLogMessage = (type, message, data) => {
-        this.logger[type](message, {
-          jobId: job.id,
+      const loggerWrapper = (level, kind, values) => {
+        this.logger[level](kind, {
+          job_id: job.id,
           attempt: job.attemptsMade,
           name: jobName,
           data: jobData,
-          messageData: data
+          ...values
         })
       }
-      job.info = (message, data) => sendLogMessage('info', message, data)
-      job.warn = (message, data) => sendLogMessage('warn', message, data)
-      job.error = (message, data) => sendLogMessage('error', message, data)
+      job.info = (kind, values) => loggerWrapper('info', kind, values)
+      job.warn = (kind, values) => loggerWrapper('warn', kind, values)
+      job.error = (kind, values) => loggerWrapper('error', kind, values)
 
       // Add a function so that jobs can queue and list jobs
       job.add = (name, data) => this.add(name, data)
@@ -118,8 +118,8 @@ class SimpleWorker {
       try {
         const result = await promiseTimeout(configuration.handler(job), job.opts.timeout)
 
-        this.logger.info('Job processing completed', {
-          jobId: job.id,
+        this.logger.info('job_processed', {
+          job_id: job.id,
           attempt: job.attemptsMade,
           name: jobName,
           data: jobData,
@@ -129,15 +129,25 @@ class SimpleWorker {
 
         done(result)
       } catch (error) {
-        this.logger.error('Job processing failed', {
-          jobId: job.id,
-          attempt: job.attemptsMade,
-          name: jobName,
-          data: jobData,
-          duration: new Date() - start,
-          errorMessage: error.message,
-          errorStack: error.stack
-        })
+        if (error instanceof PromiseTimeoutError) {
+          this.logger.error('job_timeout', {
+            job_id: job.id,
+            attempt: job.attemptsMade,
+            name: jobName,
+            data: jobData,
+            duration: new Date() - start
+          })
+        } else {
+          this.logger.error('job_errored', {
+            job_id: job.id,
+            attempt: job.attemptsMade,
+            name: jobName,
+            data: jobData,
+            duration: new Date() - start,
+            error_message: error.message,
+            error_stack: error.stack
+          })
+        }
 
         done(null, error)
       }
@@ -190,25 +200,24 @@ function splitJobData (data) {
   return { jobName, jobData }
 }
 
-function promiseTimeout (promise, ms) {
-  if (!ms) {
-    return promise
-  }
+async function promiseTimeout (promise, timeoutMs) {
+  if (!timeoutMs) return promise
 
   let timeoutId
-  let timeout = new Promise((resolve, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(new Error(`Job processing timed out after ${ms} ms`))
-    }, ms)
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timeoutId = setTimeout(() => reject(new PromiseTimeoutError()), timeoutMs)
   })
 
-  return Promise.race([
-    promise,
-    timeout
-  ]).then((result) => {
+  return Promise.race([promise, timeoutPromise]).then((result) => {
     clearTimeout(timeoutId)
     return result
   })
+}
+
+class PromiseTimeoutError extends Error {
+  constructor () {
+    super('Promise timed out')
+  }
 }
 
 function validateJobConfiguration (job) {

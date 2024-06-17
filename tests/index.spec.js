@@ -2,24 +2,22 @@
 const uuid = require('uuid')
 const SimpleWorker = require('../src/index')
 
-function filterLogData (data) {
-  if (data && typeof data.duration !== 'undefined') {
-    data.duration = 9001
-  }
-
-  if (data && data.errorStack) {
-    data.errorStack = 'Somewhere over the rainbows'
-  }
-
-  if (data && data.data && data.data.errorStack) {
-    data.data.errorStack = 'Somewhere over the rainbows'
-  }
-
-  return data
-}
-
 const makeTestQueue = (jobs) => {
-  let logs = []
+  const logs = []
+
+  function pushLog (level, kind, values) {
+    if (values) {
+      if (typeof values.duration !== 'undefined') {
+        values.duration = 9001
+      }
+
+      if (values.error_stack) {
+        values.error_stack = values.error_stack.split('\n')[0]
+      }
+    }
+
+    logs.push({ level, kind, values })
+  }
 
   const queue = new SimpleWorker({
     name: uuid(),
@@ -29,9 +27,9 @@ const makeTestQueue = (jobs) => {
     },
     jobs: jobs,
     logger: {
-      info: (message, data) => logs.push({ type: 'info', message, data: filterLogData(data) }),
-      warn: (message, data) => logs.push({ type: 'warn', message, data: filterLogData(data) }),
-      error: (message, data) => logs.push({ type: 'error', message, data: filterLogData(data) })
+      info: (kind, values) => pushLog('info', kind, values),
+      warn: (kind, values) => pushLog('warn', kind, values),
+      error: (kind, values) => pushLog('error', kind, values)
     }
   })
 
@@ -52,18 +50,18 @@ describe('SimpleWorker', () => {
   it('can create a new queue instance', () => {
     const queue = makeTestQueue([])
     expect(queue.add).not.toBe(undefined)
-    expect(queue._logs).toEqual([])
+    expect(queue._logs).toMatchSnapshot()
   })
 
   it('can queue and subsequently process a job', async () => {
     // Create a job to test if logging and passing in data is working
     let jobWasProcessed = false
     const jobFunction = async (job) => {
-      job.info('Starting job function')
+      job.info('job_function_log_info')
       await sleep(500)
-      job.warn('Sleep finished')
+      job.warn('job_function_log_warn', { foo: 'bar' })
       jobWasProcessed = job.data.input
-      job.error('Finished job function')
+      job.error('job_function_log_error')
     }
 
     // Create the queue with the job options
@@ -255,7 +253,7 @@ describe('SimpleWorker', () => {
 
     // Expect that the job got removed from the queue and the logs include the error
     expect((await queue.list()).map(job => job.data)).toEqual([])
-    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
   })
 
   it('can handle an error in the job function (sync)', async () => {
@@ -282,7 +280,7 @@ describe('SimpleWorker', () => {
 
     // Expect that the job got removed from the queue and the logs include the error
     expect((await queue.list()).map(job => job.data)).toEqual([])
-    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
   })
 
   it('can add and list jobs from within a job function', async () => {
@@ -320,7 +318,7 @@ describe('SimpleWorker', () => {
     const queue = makeTestQueue([])
     const error = new Error('Oh no.')
     queue._queue.emit('error', error, 'error running queue')
-    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
   })
 
   it('logs stalled jobs in the queue', () => {
@@ -335,7 +333,7 @@ describe('SimpleWorker', () => {
     }
 
     queue._queue.emit('stalled', job)
-    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
   })
 
   it('errors when the options are missing during setup', () => {
@@ -421,7 +419,7 @@ describe('SimpleWorker', () => {
   it('errors when the job configuration is missing while adding', () => {
     const queue = makeTestQueue([])
     expect(() => queue.add('not-existing')).toThrow()
-    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
   })
 
   it('errors when the job configuration is missing while processing', async () => {
@@ -436,6 +434,6 @@ describe('SimpleWorker', () => {
     queue.process()
     await sleep(250)
 
-    expect(queue._logs.map(filterLogData)).toMatchSnapshot()
+    expect(queue._logs).toMatchSnapshot()
   })
 })
