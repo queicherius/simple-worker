@@ -7,16 +7,20 @@ const makeTestQueue = (jobs) => {
 
   function pushLog (level, kind, values) {
     if (values) {
-      if (typeof values.duration !== 'undefined') {
-        values.duration = 9001
+      if (typeof values.job_duration !== 'undefined') {
+        values.job_duration = 9001
       }
 
       if (values.error_stack) {
         values.error_stack = values.error_stack.split('\n')[0]
       }
+
+      if (typeof values.job_data === 'undefined') {
+        delete values.job_data
+      }
     }
 
-    logs.push({ level, kind, values })
+    logs.push({ _level: level, _kind: kind, ...values })
   }
 
   const queue = new SimpleWorker({

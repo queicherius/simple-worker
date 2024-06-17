@@ -25,40 +25,30 @@ Array [
 exports[`SimpleWorker can add and list jobs from within a job function 3`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "testing-processing",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "job_id": "1",
-      "name": "testing-processing",
-    },
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "testing-processing-2",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "testing-processing-2",
   },
 ]
 `;
@@ -66,9 +56,8 @@ Array [
 exports[`SimpleWorker can create a new queue instance 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
 ]
 `;
@@ -93,45 +82,36 @@ Array [
 exports[`SimpleWorker can handle an error in the job function (async) 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "testing-errors",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "testing-errors",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "job_id": "1",
-      "name": "testing-errors",
-    },
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_id": "1",
+    "job_name": "testing-errors",
   },
   Object {
-    "kind": "job_errored",
-    "level": "error",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "duration": 9001,
-      "error_message": "The CPU is on fire.",
-      "error_stack": "Error: The CPU is on fire.",
-      "job_id": "1",
-      "name": "testing-errors",
-    },
+    "_kind": "job_errored",
+    "_level": "error",
+    "error_message": "The CPU is on fire.",
+    "error_stack": "Error: The CPU is on fire.",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_duration": 9001,
+    "job_id": "1",
+    "job_name": "testing-errors",
   },
 ]
 `;
@@ -139,45 +119,36 @@ Array [
 exports[`SimpleWorker can handle an error in the job function (sync) 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "testing-errors",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "testing-errors",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "job_id": "1",
-      "name": "testing-errors",
-    },
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_id": "1",
+    "job_name": "testing-errors",
   },
   Object {
-    "kind": "job_errored",
-    "level": "error",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "duration": 9001,
-      "error_message": "The CPU is on fire.",
-      "error_stack": "Error: The CPU is on fire.",
-      "job_id": "1",
-      "name": "testing-errors",
-    },
+    "_kind": "job_errored",
+    "_level": "error",
+    "error_message": "The CPU is on fire.",
+    "error_stack": "Error: The CPU is on fire.",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_duration": 9001,
+    "job_id": "1",
+    "job_name": "testing-errors",
   },
 ]
 `;
@@ -193,44 +164,34 @@ Array [
 exports[`SimpleWorker can pause and resume the processing 2`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "testing-processing",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "job_id": "1",
-      "name": "testing-processing",
-    },
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_processed",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "duration": 9001,
-      "job_id": "1",
-      "name": "testing-processing",
-      "result": undefined,
-    },
+    "_kind": "job_processed",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_duration": 9001,
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
 ]
 `;
@@ -256,48 +217,40 @@ Array [
 exports[`SimpleWorker can queue and subsequently process a job 3`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": Object {
-        "input": "123",
-      },
-      "name": "testing-processing",
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_data": Object {
+      "input": "123",
     },
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "job_id": "1",
-      "name": "testing-processing",
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_function_log_info",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "job_id": "1",
-      "name": "testing-processing",
+    "_kind": "job_function_log_info",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
 ]
 `;
@@ -305,87 +258,72 @@ Array [
 exports[`SimpleWorker can queue and subsequently process a job 4`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": Object {
-        "input": "123",
-      },
-      "name": "testing-processing",
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_data": Object {
+      "input": "123",
     },
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "job_id": "1",
-      "name": "testing-processing",
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_function_log_info",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "job_id": "1",
-      "name": "testing-processing",
+    "_kind": "job_function_log_info",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_function_log_warn",
-    "level": "warn",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "foo": "bar",
-      "job_id": "1",
-      "name": "testing-processing",
+    "_kind": "job_function_log_warn",
+    "_level": "warn",
+    "foo": "bar",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_function_log_error",
-    "level": "error",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "job_id": "1",
-      "name": "testing-processing",
+    "_kind": "job_function_log_error",
+    "_level": "error",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_processed",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {
-        "input": "123",
-      },
-      "duration": 9001,
-      "job_id": "1",
-      "name": "testing-processing",
-      "result": undefined,
+    "_kind": "job_processed",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {
+      "input": "123",
     },
+    "job_duration": 9001,
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
 ]
 `;
@@ -399,43 +337,34 @@ Object {
 exports[`SimpleWorker can timeout a long running job 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "testing-processing",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_started",
-    "level": "info",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "job_id": "1",
-      "name": "testing-processing",
-    },
+    "_kind": "job_started",
+    "_level": "info",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
   Object {
-    "kind": "job_timeout",
-    "level": "error",
-    "values": Object {
-      "attempt": 0,
-      "data": Object {},
-      "duration": 9001,
-      "job_id": "1",
-      "name": "testing-processing",
-    },
+    "_kind": "job_timeout",
+    "_level": "error",
+    "job_attempt": 0,
+    "job_data": Object {},
+    "job_duration": 9001,
+    "job_id": "1",
+    "job_name": "testing-processing",
   },
 ]
 `;
@@ -443,17 +372,14 @@ Array [
 exports[`SimpleWorker errors when the job configuration is missing while adding 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_errored",
-    "level": "error",
-    "values": Object {
-      "error_message": "Job configuration not found",
-      "name": "not-existing",
-    },
+    "_kind": "job_errored",
+    "_level": "error",
+    "error_message": "Job configuration not found",
+    "job_name": "not-existing",
   },
 ]
 `;
@@ -461,30 +387,23 @@ Array [
 exports[`SimpleWorker errors when the job configuration is missing while processing 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queued",
-    "level": "info",
-    "values": Object {
-      "data": undefined,
-      "name": "not-existing",
-    },
+    "_kind": "job_queued",
+    "_level": "info",
+    "job_name": "not-existing",
   },
   Object {
-    "kind": "job_processing_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_processing_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_errored",
-    "level": "error",
-    "values": Object {
-      "error_message": "Job configuration not found",
-      "name": "not-existing",
-    },
+    "_kind": "job_errored",
+    "_level": "error",
+    "error_message": "Job configuration not found",
+    "job_name": "not-existing",
   },
 ]
 `;
@@ -492,17 +411,14 @@ Array [
 exports[`SimpleWorker logs internal errors in the queue 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_queue_connection_error",
-    "level": "error",
-    "values": Object {
-      "error_message": "Oh no.",
-      "error_stack": "Error: Oh no.",
-    },
+    "_kind": "job_queue_connection_error",
+    "_level": "error",
+    "error_message": "Oh no.",
+    "error_stack": "Error: Oh no.",
   },
 ]
 `;
@@ -510,21 +426,18 @@ Array [
 exports[`SimpleWorker logs stalled jobs in the queue 1`] = `
 Array [
   Object {
-    "kind": "job_queue_connection_ready",
-    "level": "info",
-    "values": undefined,
+    "_kind": "job_queue_connection_ready",
+    "_level": "info",
   },
   Object {
-    "kind": "job_stalled",
-    "level": "warn",
-    "values": Object {
-      "attempt": 1,
-      "data": Object {
-        "email": "pepe@me.me",
-      },
-      "job_id": 333,
-      "name": "test-handler",
+    "_kind": "job_stalled",
+    "_level": "warn",
+    "job_attempt": 1,
+    "job_data": Object {
+      "email": "pepe@me.me",
     },
+    "job_id": 333,
+    "job_name": "test-handler",
   },
 ]
 `;

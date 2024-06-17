@@ -39,9 +39,9 @@ class SimpleWorker {
       const { jobName, jobData } = splitJobData(job.data)
       this.logger.warn('job_stalled', {
         job_id: job.id,
-        attempt: job.attemptsMade,
-        name: jobName,
-        data: jobData
+        job_attempt: job.attemptsMade,
+        job_name: jobName,
+        job_data: jobData
       })
     })
   }
@@ -50,7 +50,7 @@ class SimpleWorker {
     const configuration = this.jobConfiguration[name]
 
     if (!configuration) {
-      this.logger.error('job_errored', { name, error_message: 'Job configuration not found' })
+      this.logger.error('job_errored', { job_name: name, error_message: 'Job configuration not found' })
       throw new Error(`Job configuration not found`)
     }
 
@@ -61,7 +61,7 @@ class SimpleWorker {
       { removeOnComplete: true, removeOnFail: true }
     )
 
-    this.logger.info('job_queued', { name, data })
+    this.logger.info('job_queued', { job_name: name, job_data: data })
     return this._queue.add('job', jobData, jobOptions)
   }
 
@@ -70,7 +70,7 @@ class SimpleWorker {
 
     schedulable.forEach(job => {
       const schedule = cronstring(job.scheduling) ? cronstring(job.scheduling) : job.scheduling
-      this.logger.info('job_scheduled', { name: job.name, schedule })
+      this.logger.info('job_scheduled', { job_name: job.name, job_schedule: schedule })
       scheduler.scheduleJob(schedule, () => this.add(job.name))
     })
   }
@@ -83,23 +83,26 @@ class SimpleWorker {
       const configuration = this.jobConfiguration[jobName]
 
       if (!configuration) {
-        return this.logger.error('job_errored', { name: jobName, error_message: 'Job configuration not found' })
+        return this.logger.error('job_errored', {
+          job_name: jobName,
+          error_message: 'Job configuration not found'
+        })
       }
 
       this.logger.info('job_started', {
         job_id: job.id,
-        attempt: job.attemptsMade,
-        name: jobName,
-        data: jobData
+        job_attempt: job.attemptsMade,
+        job_name: jobName,
+        job_data: jobData
       })
 
       // Add a function so that jobs can log into the same logger
       const loggerWrapper = (level, kind, values) => {
         this.logger[level](kind, {
           job_id: job.id,
-          attempt: job.attemptsMade,
-          name: jobName,
-          data: jobData,
+          job_attempt: job.attemptsMade,
+          job_name: jobName,
+          job_data: jobData,
           ...values
         })
       }
@@ -120,11 +123,10 @@ class SimpleWorker {
 
         this.logger.info('job_processed', {
           job_id: job.id,
-          attempt: job.attemptsMade,
-          name: jobName,
-          data: jobData,
-          duration: new Date() - start,
-          result
+          job_attempt: job.attemptsMade,
+          job_name: jobName,
+          job_data: jobData,
+          job_duration: new Date() - start
         })
 
         done(result)
@@ -132,18 +134,18 @@ class SimpleWorker {
         if (error instanceof PromiseTimeoutError) {
           this.logger.error('job_timeout', {
             job_id: job.id,
-            attempt: job.attemptsMade,
-            name: jobName,
-            data: jobData,
-            duration: new Date() - start
+            job_attempt: job.attemptsMade,
+            job_name: jobName,
+            job_data: jobData,
+            job_duration: new Date() - start
           })
         } else {
           this.logger.error('job_errored', {
             job_id: job.id,
-            attempt: job.attemptsMade,
-            name: jobName,
-            data: jobData,
-            duration: new Date() - start,
+            job_attempt: job.attemptsMade,
+            job_name: jobName,
+            job_data: jobData,
+            job_duration: new Date() - start,
             error_message: error.message,
             error_stack: error.stack
           })
